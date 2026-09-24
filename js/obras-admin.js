@@ -6,6 +6,7 @@ import { loadObras } from "./obras.js";
 import { showToast } from "./toast.js";
 import { renderIcons } from "./icons.js";
 import "./tooltip.js";
+import { createObraSchema, editObraSchema, firstErrorMessage } from "./validation.js";
 
 const obrasBody = document.getElementById("obras-body");
 const createForm = document.getElementById("create-obra-form");
@@ -93,10 +94,16 @@ async function deleteObra(id, nombre) {
 editForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const nombre = editNombreInput.value.trim();
-  const activa = editActivaInput.checked;
+  const parsed = editObraSchema.safeParse({
+    nombre: editNombreInput.value,
+    activa: editActivaInput.checked,
+  });
+  if (!parsed.success) {
+    showToast(firstErrorMessage(parsed), "error");
+    return;
+  }
 
-  const { error } = await supabase.from("obras").update({ nombre, activa }).eq("id", editingId);
+  const { error } = await supabase.from("obras").update(parsed.data).eq("id", editingId);
   if (error) {
     showToast(`Error al guardar: ${error.message}`, "error");
     return;
@@ -110,15 +117,21 @@ editForm.addEventListener("submit", async (event) => {
 createForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const nombre = document.getElementById("new-obra-nombre").value.trim();
+  const parsed = createObraSchema.safeParse({
+    nombre: document.getElementById("new-obra-nombre").value,
+  });
+  if (!parsed.success) {
+    showToast(firstErrorMessage(parsed), "error");
+    return;
+  }
 
-  const { error } = await supabase.from("obras").insert({ nombre });
+  const { error } = await supabase.from("obras").insert(parsed.data);
   if (error) {
     showToast(`Error al crear la obra: ${error.message}`, "error");
     return;
   }
 
-  showToast(`Obra "${nombre}" creada.`, "success");
+  showToast(`Obra "${parsed.data.nombre}" creada.`, "success");
   createForm.reset();
   await loadAndRenderObras();
   createModal.close();

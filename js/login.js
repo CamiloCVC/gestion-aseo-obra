@@ -1,5 +1,6 @@
 import { supabase } from "./supabase-client.js";
 import { getProfile, landingPageFor } from "./auth.js";
+import { loginSchema, firstErrorMessage } from "./validation.js";
 
 const loginForm = document.getElementById("login-form");
 const loginError = document.getElementById("login-error");
@@ -24,10 +25,16 @@ loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   loginError.textContent = "";
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+  const result = loginSchema.safeParse({
+    email: document.getElementById("email").value,
+    password: document.getElementById("password").value,
+  });
+  if (!result.success) {
+    loginError.textContent = firstErrorMessage(result);
+    return;
+  }
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword(result.data);
   if (error) {
     loginError.textContent = "Credenciales inválidas.";
     return;

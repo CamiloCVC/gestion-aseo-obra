@@ -6,6 +6,7 @@ import { escapeHtml } from "./escape-html.js";
 import { showToast } from "./toast.js";
 import { renderIcons } from "./icons.js";
 import "./tooltip.js";
+import { createUserSchema, editUserSchema, firstErrorMessage } from "./validation.js";
 
 const usersBody = document.getElementById("users-body");
 const createForm = document.getElementById("create-user-form");
@@ -87,11 +88,17 @@ function openEditModal(dataset) {
 editForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const nombre = editNombreInput.value.trim();
-  const role = editRoleInput.value;
-  const activo = editActivoInput.checked;
+  const parsed = editUserSchema.safeParse({
+    nombre: editNombreInput.value,
+    role: editRoleInput.value,
+    activo: editActivoInput.checked,
+  });
+  if (!parsed.success) {
+    showToast(firstErrorMessage(parsed), "error");
+    return;
+  }
 
-  const { error } = await supabase.from("profiles").update({ nombre, role, activo }).eq("id", editingId);
+  const { error } = await supabase.from("profiles").update(parsed.data).eq("id", editingId);
   if (error) {
     showToast(`Error al guardar: ${error.message}`, "error");
     return;
@@ -131,14 +138,20 @@ async function deleteUser(id, email) {
 createForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
+  const parsed = createUserSchema.safeParse({
+    email: document.getElementById("new-email").value,
+    nombre: document.getElementById("new-nombre").value,
+    password: document.getElementById("new-password").value,
+    role: document.getElementById("new-role").value,
+  });
+  if (!parsed.success) {
+    showToast(firstErrorMessage(parsed), "error");
+    return;
+  }
+
   const {
     data: { session },
   } = await supabase.auth.getSession();
-
-  const email = document.getElementById("new-email").value.trim();
-  const nombre = document.getElementById("new-nombre").value.trim();
-  const password = document.getElementById("new-password").value;
-  const role = document.getElementById("new-role").value;
 
   try {
     const response = await fetch(`${supabaseUrl}/functions/v1/admin-create-user`, {
@@ -147,7 +160,7 @@ createForm.addEventListener("submit", async (event) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ email, password, nombre, role }),
+      body: JSON.stringify(parsed.data),
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error ?? "Error desconocido");

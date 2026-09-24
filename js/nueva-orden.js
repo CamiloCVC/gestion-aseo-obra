@@ -5,6 +5,7 @@ import { wireDropZone } from "./drop-zone.js";
 import { compressImage } from "./image-compression.js";
 import { loadObras } from "./obras.js";
 import { escapeHtml } from "./escape-html.js";
+import { nuevaOrdenSchema, firstErrorMessage } from "./validation.js";
 
 const form = document.getElementById("order-form");
 const obraSelect = document.getElementById("obra");
@@ -98,6 +99,17 @@ async function uploadPhotos(files, orderId, stage) {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
+  const result = nuevaOrdenSchema.safeParse({
+    obra_id: obraSelect.value,
+    piso: document.getElementById("piso").value,
+    contratista: document.getElementById("contratista").value,
+    fecha_hora: fechaHoraInput.value,
+  });
+  if (!result.success) {
+    statusEl.textContent = firstErrorMessage(result);
+    return;
+  }
+
   if (state.antes.length === 0) {
     statusEl.textContent = "Debes adjuntar al menos una foto de antes.";
     return;
@@ -116,10 +128,10 @@ form.addEventListener("submit", async (event) => {
 
     const { error } = await supabase.from("ordenes").insert({
       id: orderId,
-      obra_id: obraSelect.value || null,
-      piso: document.getElementById("piso").value.trim(),
-      contratista: document.getElementById("contratista").value.trim(),
-      fecha_hora: fechaHoraInput.value,
+      obra_id: result.data.obra_id,
+      piso: result.data.piso,
+      contratista: result.data.contratista,
+      fecha_hora: result.data.fecha_hora,
       comentarios: document.getElementById("comentarios").value.trim(),
       fotos_antes: fotosAntesPaths,
       fotos_despues: fotosDespuesPaths,
