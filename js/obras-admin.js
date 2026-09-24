@@ -4,6 +4,8 @@ import { renderHeader } from "./layout.js";
 import { escapeHtml } from "./escape-html.js";
 import { loadObras } from "./obras.js";
 import { showToast } from "./toast.js";
+import { renderIcons } from "./icons.js";
+import "./tooltip.js";
 
 const obrasBody = document.getElementById("obras-body");
 const createForm = document.getElementById("create-obra-form");
@@ -49,6 +51,7 @@ async function loadAndRenderObras() {
   obrasBody.querySelectorAll(".delete-obra-btn").forEach((btn) => {
     btn.addEventListener("click", () => deleteObra(btn.dataset.id, btn.dataset.nombre));
   });
+  renderIcons();
 }
 
 function rowTemplate(obra) {
@@ -56,9 +59,9 @@ function rowTemplate(obra) {
     <tr data-id="${escapeHtml(obra.id)}">
       <td>${escapeHtml(obra.nombre)}</td>
       <td><span class="badge ${obra.activa ? "badge-completa" : "badge-pendiente"}">${obra.activa ? "Activa" : "Inactiva"}</span></td>
-      <td>
-        <button class="secondary edit-obra-btn" data-id="${escapeHtml(obra.id)}" data-nombre="${escapeHtml(obra.nombre)}" data-activa="${obra.activa}">Editar</button>
-        <button class="secondary danger delete-obra-btn" data-id="${escapeHtml(obra.id)}" data-nombre="${escapeHtml(obra.nombre)}">Eliminar</button>
+      <td class="icon-actions">
+        <button class="icon-btn edit-obra-btn" data-id="${escapeHtml(obra.id)}" data-nombre="${escapeHtml(obra.nombre)}" data-activa="${obra.activa}" data-tooltip="Editar obra" aria-label="Editar obra"><i data-lucide="pencil"></i></button>
+        <button class="icon-btn icon-btn-danger delete-obra-btn" data-id="${escapeHtml(obra.id)}" data-nombre="${escapeHtml(obra.nombre)}" data-tooltip="Eliminar obra" aria-label="Eliminar obra"><i data-lucide="trash-2"></i></button>
       </td>
     </tr>
   `;

@@ -2,6 +2,8 @@ import { supabase } from "./supabase-client.js";
 import { requireActiveProfile } from "./auth.js";
 import { renderHeader } from "./layout.js";
 import { escapeHtml } from "./escape-html.js";
+import { renderIcons } from "./icons.js";
+import "./tooltip.js";
 
 const tableBody = document.getElementById("orders-body");
 
@@ -43,9 +45,10 @@ async function loadMyOrders(userId) {
           <td>${escapeHtml(order.contratista)}</td>
           <td>${(order.fotos_antes ?? []).length} / ${(order.fotos_despues ?? []).length}</td>
           <td><span class="badge ${isPending ? "badge-pendiente" : "badge-completa"}">${isPending ? "Pendiente" : "Completa"}</span></td>
-          <td>${isPending ? `<a class="button-link" href="completar-orden.html?id=${escapeHtml(order.id)}">Completar</a>` : ""}</td>
+          <td class="icon-actions">${isPending ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}</td>
         </tr>
       `;
     })
     .join("");
+  renderIcons();
 }

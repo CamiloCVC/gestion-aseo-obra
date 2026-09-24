@@ -5,6 +5,8 @@ import { escapeHtml } from "./escape-html.js";
 import { renderCarousel } from "./carousel.js";
 import { loadObras } from "./obras.js";
 import { showToast } from "./toast.js";
+import { renderIcons } from "./icons.js";
+import "./tooltip.js";
 
 const tableBody = document.getElementById("orders-body");
 const modal = document.getElementById("detail-modal");
@@ -116,16 +118,17 @@ function renderOrders(data) {
       <td>${escapeHtml(order.profiles?.nombre)}</td>
       <td>${(order.fotos_antes ?? []).length} / ${(order.fotos_despues ?? []).length}</td>
       <td><span class="badge ${isPending ? "badge-pendiente" : "badge-completa"}">${isPending ? "Pendiente" : "Completa"}</span></td>
-      <td>
-        <button class="secondary ver-btn">Ver</button>
-        ${isPending && isOwn ? `<a class="button-link" href="completar-orden.html?id=${escapeHtml(order.id)}">Completar</a>` : ""}
-        <button class="secondary danger delete-btn">Eliminar</button>
+      <td class="icon-actions">
+        <button class="icon-btn ver-btn" data-tooltip="Ver detalle" aria-label="Ver detalle"><i data-lucide="eye"></i></button>
+        ${isPending && isOwn ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}
+        <button class="icon-btn icon-btn-danger delete-btn" data-tooltip="Eliminar orden" aria-label="Eliminar orden"><i data-lucide="trash-2"></i></button>
       </td>
     `;
     row.querySelector(".ver-btn").addEventListener("click", () => openDetail(order));
     row.querySelector(".delete-btn").addEventListener("click", () => deleteOrder(order));
     tableBody.appendChild(row);
   }
+  renderIcons();
 }
 
 async function deleteOrder(order) {
