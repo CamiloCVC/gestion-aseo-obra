@@ -129,6 +129,19 @@ h1, h2, h3, h4 {
   background: #1d4ed8;
 }
 
+.badge-pendiente,
+.badge-completa {
+  color: var(--color-text);
+}
+
+.badge-pendiente {
+  background: #fde68a;
+}
+
+.badge-completa {
+  background: #bbf7d0;
+}
+
 /* Auth page */
 
 .auth-body {

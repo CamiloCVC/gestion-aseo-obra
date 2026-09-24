@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Completar orden — Gestión de Aseo de Obra</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <h2>Completar orden</h2>
+    <div id="order-summary" class="form-card">
+      <p class="empty-state">Cargando orden...</p>
+    </div>
+
+    <div class="gallery">
+      <h4>Evidencia — antes (ya registrada)</h4>
+      <div id="carousel-antes"></div>
+    </div>
+
+    <form id="complete-form" novalidate>
+      <fieldset class="evidence-fieldset">
+        <legend>Evidencia — después de limpiar</legend>
+        <div class="dropzone" id="dropzone-despues" tabindex="0" role="button" aria-label="Adjuntar fotos de después">
+          <p>Arrastra fotos aquí o haz clic para elegirlas</p>
+          <p class="dropzone-hint">Puedes adjuntar varias</p>
+        </div>
+        <input type="file" id="fotos-despues" accept="image/*" capture="environment" multiple hidden />
+        <div class="thumb-grid" id="preview-despues"></div>
+      </fieldset>
+
+      <button type="submit" id="submit-btn">Completar orden</button>
+      <p id="status" role="status"></p>
+    </form>
+  </main>
+
+  <script type="module" src="js/completar-orden.js"></script>
+</body>
+</html>

@@ -23,25 +23,28 @@ async function loadMyOrders(userId) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    tableBody.innerHTML = `<tr><td colspan="4" class="empty-state">Error cargando órdenes: ${escapeHtml(error.message)}</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">Error cargando órdenes: ${escapeHtml(error.message)}</td></tr>`;
     return;
   }
 
   if (data.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="4" class="empty-state">Aún no has registrado ninguna orden.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">Aún no has registrado ninguna orden.</td></tr>`;
     return;
   }
 
   tableBody.innerHTML = data
-    .map(
-      (order) => `
+    .map((order) => {
+      const isPending = (order.fotos_despues ?? []).length === 0;
+      return `
         <tr>
           <td>${escapeHtml(order.fecha_hora)}</td>
           <td>${escapeHtml(order.piso)}</td>
           <td>${escapeHtml(order.contratista)}</td>
           <td>${(order.fotos_antes ?? []).length} / ${(order.fotos_despues ?? []).length}</td>
+          <td><span class="badge ${isPending ? "badge-pendiente" : "badge-completa"}">${isPending ? "Pendiente" : "Completa"}</span></td>
+          <td>${isPending ? `<a class="button-link" href="completar-orden.html?id=${escapeHtml(order.id)}">Completar</a>` : ""}</td>
         </tr>
-      `
-    )
+      `;
+    })
     .join("");
 }

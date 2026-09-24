@@ -87,8 +87,8 @@ async function uploadPhotos(files, orderId, stage) {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  if (state.antes.length === 0 || state.despues.length === 0) {
-    statusEl.textContent = "Debes adjuntar al menos una foto de antes y una de después.";
+  if (state.antes.length === 0) {
+    statusEl.textContent = "Debes adjuntar al menos una foto de antes.";
     return;
   }
 
@@ -116,7 +116,11 @@ form.addEventListener("submit", async (event) => {
 
     const backHref = landingPageFor(currentProfile?.role);
     const backLabel = backHref === "admin.html" ? "Ir a Órdenes" : "Ir a Mis órdenes";
-    statusEl.innerHTML = `Orden registrada correctamente. <a href="${backHref}">${backLabel}</a>`;
+    const pendingNote =
+      fotosDespuesPaths.length === 0
+        ? " Quedó como <strong>pendiente</strong> — podrás completarla con las fotos de después cuando termines."
+        : "";
+    statusEl.innerHTML = `Orden registrada correctamente.${pendingNote} <a href="${backHref}">${backLabel}</a>`;
 
     form.reset();
     state.antes = [];

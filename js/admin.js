@@ -28,17 +28,20 @@ async function loadOrders() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">Error cargando órdenes: ${escapeHtml(error.message)}</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Error cargando órdenes: ${escapeHtml(error.message)}</td></tr>`;
     return;
   }
 
   if (data.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">Aún no hay órdenes registradas.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Aún no hay órdenes registradas.</td></tr>`;
     return;
   }
 
   tableBody.innerHTML = "";
   for (const order of data) {
+    const isPending = (order.fotos_despues ?? []).length === 0;
+    const isOwn = order.creado_por_id === auth.session.user.id;
+
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${escapeHtml(order.fecha_hora)}</td>
@@ -46,7 +49,11 @@ async function loadOrders() {
       <td>${escapeHtml(order.contratista)}</td>
       <td>${escapeHtml(order.profiles?.nombre)}</td>
       <td>${(order.fotos_antes ?? []).length} / ${(order.fotos_despues ?? []).length}</td>
-      <td><button class="secondary ver-btn">Ver</button></td>
+      <td><span class="badge ${isPending ? "badge-pendiente" : "badge-completa"}">${isPending ? "Pendiente" : "Completa"}</span></td>
+      <td>
+        <button class="secondary ver-btn">Ver</button>
+        ${isPending && isOwn ? `<a class="button-link" href="completar-orden.html?id=${escapeHtml(order.id)}">Completar</a>` : ""}
+      </td>
     `;
     row.querySelector(".ver-btn").addEventListener("click", () => openDetail(order));
     tableBody.appendChild(row);
