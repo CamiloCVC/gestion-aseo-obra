@@ -29,13 +29,12 @@
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Activa</th>
-            <th></th>
+            <th>Estado</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="obras-body">
-          <tr><td colspan="4" class="empty-state">Cargando...</td></tr>
+          <tr><td colspan="3" class="empty-state">Cargando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -51,7 +50,24 @@
         <button type="submit">Crear obra</button>
         <button type="button" class="secondary" id="create-obra-cancel">Cancelar</button>
       </div>
-      <p id="create-obra-status" role="status"></p>
+    </form>
+  </dialog>
+
+  <dialog id="edit-obra-modal">
+    <h3>Editar obra</h3>
+    <form id="edit-obra-form" novalidate>
+      <label for="edit-obra-nombre">Nombre de la obra</label>
+      <input id="edit-obra-nombre" type="text" required />
+
+      <label class="checkbox-label">
+        <input id="edit-obra-activa" type="checkbox" />
+        Obra activa
+      </label>
+
+      <div class="modal-actions">
+        <button type="submit">Guardar cambios</button>
+        <button type="button" class="secondary" id="edit-obra-cancel">Cancelar</button>
+      </div>
     </form>
   </dialog>
 

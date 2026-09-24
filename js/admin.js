@@ -4,6 +4,7 @@ import { renderHeader } from "./layout.js";
 import { escapeHtml } from "./escape-html.js";
 import { renderCarousel } from "./carousel.js";
 import { loadObras } from "./obras.js";
+import { showToast } from "./toast.js";
 
 const tableBody = document.getElementById("orders-body");
 const modal = document.getElementById("detail-modal");
@@ -139,10 +140,11 @@ async function deleteOrder(order) {
 
   const { error } = await supabase.from("ordenes").delete().eq("id", order.id);
   if (error) {
-    alert(`Error al eliminar: ${error.message}`);
+    showToast(`Error al eliminar: ${error.message}`, "error");
     return;
   }
 
+  showToast("Orden eliminada.", "success");
   await loadOrders();
 }
 

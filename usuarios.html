@@ -31,8 +31,7 @@
             <th>Correo</th>
             <th>Nombre</th>
             <th>Rol</th>
-            <th>Activo</th>
-            <th></th>
+            <th>Estado</th>
             <th></th>
           </tr>
         </thead>
@@ -66,7 +65,31 @@
         <button type="submit">Crear usuario</button>
         <button type="button" class="secondary" id="create-user-cancel">Cancelar</button>
       </div>
-      <p id="create-status" role="status"></p>
+    </form>
+  </dialog>
+
+  <dialog id="edit-user-modal">
+    <h3>Editar usuario</h3>
+    <form id="edit-user-form" novalidate>
+      <label for="edit-user-nombre">Nombre</label>
+      <input id="edit-user-nombre" type="text" required />
+
+      <label for="edit-user-role">Rol</label>
+      <select id="edit-user-role">
+        <option value="empleado">Empleado</option>
+        <option value="admin">Admin</option>
+        <option value="superadmin">Superadmin</option>
+      </select>
+
+      <label class="checkbox-label">
+        <input id="edit-user-activo" type="checkbox" />
+        Usuario activo
+      </label>
+
+      <div class="modal-actions">
+        <button type="submit">Guardar cambios</button>
+        <button type="button" class="secondary" id="edit-user-cancel">Cancelar</button>
+      </div>
     </form>
   </dialog>
 

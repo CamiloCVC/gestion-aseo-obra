@@ -121,10 +121,16 @@ h4 {
 
 .topbar-nav {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
   gap: var(--space-md);
   flex: 1;
   min-width: 0;
+}
+
+.topbar-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .topbar-nav a {
@@ -132,6 +138,8 @@ h4 {
   text-decoration: none;
   font-size: 0.85rem;
   font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
   padding: 0.3rem 0;
   border-bottom: 2px solid transparent;
   transition: color var(--duration-fast) var(--ease-out-expo);
@@ -256,6 +264,21 @@ label {
   margin-bottom: var(--space-xs);
   font-size: 0.82rem;
   color: var(--color-muted);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
 }
 
 input,
@@ -538,9 +561,7 @@ button.danger:hover {
 }
 
 #status,
-#login-error,
-#create-status,
-#create-obra-status {
+#login-error {
   min-height: 1.2rem;
   font-size: 0.9rem;
   color: var(--color-muted);
@@ -620,12 +641,6 @@ tbody tr:hover {
   padding: var(--space-md);
 }
 
-.save-feedback {
-  font-size: 0.8rem;
-  color: var(--color-muted);
-  margin-left: var(--space-xs);
-}
-
 /* Modal */
 
 dialog {
@@ -641,6 +656,58 @@ dialog {
 
 dialog::backdrop {
   background: rgb(20 20 18 / 0.4);
+}
+
+/* Toasts */
+
+#toast-container {
+  position: fixed;
+  bottom: var(--space-md);
+  right: var(--space-md);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  max-width: min(360px, calc(100vw - 2 * var(--space-md)));
+}
+
+.toast {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-muted);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.9rem;
+  font-size: 0.85rem;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 28px -12px rgb(0 0 0 / 0.25);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity var(--duration-fast) var(--ease-out-expo), transform var(--duration-fast) var(--ease-out-expo);
+}
+
+.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-success {
+  border-left-color: var(--color-success);
+}
+
+.toast-error {
+  border-left-color: var(--color-danger);
+}
+
+.toast-info {
+  border-left-color: var(--color-accent);
+}
+
+@media (max-width: 640px) {
+  #toast-container {
+    left: var(--space-md);
+    right: var(--space-md);
+    max-width: none;
+  }
 }
 
 .gallery h4 {
@@ -662,7 +729,7 @@ dialog::backdrop {
   border: 1px solid var(--color-border);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
   .topbar {
     flex-wrap: wrap;
   }
@@ -674,6 +741,8 @@ dialog::backdrop {
   .topbar-nav {
     order: 3;
     width: 100%;
+    flex-wrap: wrap;
+    overflow-x: visible;
     gap: var(--space-sm);
   }
 
@@ -682,7 +751,9 @@ dialog::backdrop {
     width: 100%;
     justify-content: space-between;
   }
+}
 
+@media (max-width: 640px) {
   .panel-header {
     flex-direction: column;
     align-items: flex-start;
