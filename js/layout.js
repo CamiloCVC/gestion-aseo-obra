@@ -14,7 +14,12 @@ export function renderHeader(container, { title, profile, activeHref }) {
     ? [
         { href: "admin.html", label: "Órdenes" },
         { href: "nueva-orden.html", label: "Nueva orden" },
-        ...(profile.role === "superadmin" ? [{ href: "usuarios.html", label: "Usuarios" }] : []),
+        ...(profile.role === "superadmin"
+          ? [
+              { href: "usuarios.html", label: "Usuarios" },
+              { href: "obras.html", label: "Obras" },
+            ]
+          : []),
       ]
     : [
         { href: "mis-ordenes.html", label: "Mis órdenes" },

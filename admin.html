@@ -18,11 +18,32 @@
       </div>
     </div>
 
+    <form class="inline-form" id="filters-form">
+      <div>
+        <label for="filter-search">Buscar</label>
+        <input type="search" id="filter-search" placeholder="Piso, contratista, comentarios..." />
+      </div>
+      <div>
+        <label for="filter-empleado">Empleado</label>
+        <select id="filter-empleado"><option value="">Todos</option></select>
+      </div>
+      <div>
+        <label for="filter-obra">Obra</label>
+        <select id="filter-obra"><option value="">Todas</option></select>
+      </div>
+      <div>
+        <label for="filter-fecha">Fecha</label>
+        <input type="date" id="filter-fecha" />
+      </div>
+      <button type="button" class="secondary" id="filter-clear">Limpiar filtros</button>
+    </form>
+
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>Fecha/hora</th>
+            <th>Obra</th>
             <th>Piso/Lugar</th>
             <th>Contratista</th>
             <th>Creado por</th>
@@ -32,7 +53,7 @@
           </tr>
         </thead>
         <tbody id="orders-body">
-          <tr><td colspan="7" class="empty-state">Cargando...</td></tr>
+          <tr><td colspan="8" class="empty-state">Cargando...</td></tr>
         </tbody>
       </table>
     </div>

@@ -30,7 +30,7 @@ if (auth && orderId) {
 }
 
 async function loadOrder(id) {
-  const { data: order, error } = await supabase.from("ordenes").select("*").eq("id", id).single();
+  const { data: order, error } = await supabase.from("ordenes").select("*, obras(nombre)").eq("id", id).single();
 
   if (error || !order) {
     summaryEl.innerHTML = `<p class="empty-state">No se encontró la orden, o no tienes acceso a ella.</p>`;
@@ -39,6 +39,7 @@ async function loadOrder(id) {
   }
 
   summaryEl.innerHTML = `
+    <p><strong>Obra:</strong> ${escapeHtml(order.obras?.nombre) || "-"}</p>
     <p><strong>Piso/Lugar:</strong> ${escapeHtml(order.piso)}</p>
     <p><strong>Contratista:</strong> ${escapeHtml(order.contratista)}</p>
     <p><strong>Fecha y hora:</strong> ${escapeHtml(order.fecha_hora)}</p>

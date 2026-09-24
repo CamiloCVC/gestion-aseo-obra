@@ -12,8 +12,8 @@ sin tarjeta. Pensada para GitHub Pages.
 - **Admin**: ve todas las órdenes de cualquier empleado (`admin.html`, con
   previsualización de evidencia) y también puede crear órdenes.
 - **Superadmin**: todo lo del admin, más una sección de usuarios
-  (`usuarios.html`) para crear cuentas, editar nombre/rol y
-  activar/desactivar a cualquier usuario.
+  (`usuarios.html`) para crear, editar y eliminar cuentas, y una sección de
+  obras (`obras.html`) para crear obras y activarlas/desactivarlas.
 
 ## Arquitectura
 
@@ -53,19 +53,28 @@ datos protegidas por RLS.
 
 - `profiles`: `id` (= `auth.users.id`), `nombre`, `email`, `role`
   (`empleado`/`admin`/`superadmin`), `activo`.
-- `ordenes`: `piso`, `contratista`, `fecha_hora`, `comentarios`,
-  `fotos_antes`/`fotos_despues` (rutas dentro del bucket, no URLs — son
-  privadas y se firman al vuelo con `createSignedUrls`), `creado_por_id`.
+- `obras`: `nombre`, `activa` — lista de obras activas que se muestra como
+  select al crear una orden. Solo staff (admin/superadmin) puede crear o
+  editar obras.
+- `ordenes`: `obra_id` (referencia a `obras`, opcional), `piso`,
+  `contratista`, `fecha_hora`, `comentarios`, `fotos_antes`/`fotos_despues`
+  (rutas dentro del bucket, no URLs — son privadas y se firman al vuelo con
+  `createSignedUrls`), `creado_por_id`.
 
 Las imágenes se guardan en el bucket `evidencias` bajo
 `ordenes/{orderId}/antes/` y `ordenes/{orderId}/despues/`.
 
+## Borrado
+
+- Solo staff (admin/superadmin) puede eliminar órdenes, desde `admin.html`.
+  Al eliminar una orden también se borran sus fotos del bucket `evidencias`.
+- Solo superadmin puede eliminar usuarios, desde `usuarios.html`. El borrado
+  usa la Edge Function `admin-create-user` (método `DELETE`) para eliminar
+  la cuenta vía Admin API, lo que además elimina en cascada su `profile`.
+  Un superadmin no puede eliminar su propia cuenta.
+
 ## Límites conocidos
 
-- No hay borrado de usuarios ni de órdenes desde la UI (solo
-  activar/desactivar usuarios) — las órdenes son un registro de auditoría
-  inmutable a propósito. Si hace falta borrar de verdad, es una operación
-  manual en el dashboard de Supabase.
 - El linter de seguridad de Supabase marca `is_staff()`/`is_superadmin()`/
   `is_active_user()` como invocables directamente vía RPC por usuarios
   autenticados. Es intencional: las políticas RLS necesitan que

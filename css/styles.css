@@ -234,6 +234,11 @@ button.secondary {
   border: 1px solid var(--color-border);
 }
 
+button.danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
 .button-link {
   display: inline-block;
   background: var(--color-accent);

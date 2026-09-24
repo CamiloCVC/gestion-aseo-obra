@@ -34,7 +34,7 @@ async function loadUsers() {
     .order("email", { ascending: true });
 
   if (error) {
-    usersBody.innerHTML = `<tr><td colspan="5" class="empty-state">Error: ${escapeHtml(error.message)}</td></tr>`;
+    usersBody.innerHTML = `<tr><td colspan="6" class="empty-state">Error: ${escapeHtml(error.message)}</td></tr>`;
     return;
   }
 
@@ -42,9 +42,13 @@ async function loadUsers() {
   usersBody.querySelectorAll(".save-user-btn").forEach((btn) => {
     btn.addEventListener("click", () => saveUser(btn.dataset.id));
   });
+  usersBody.querySelectorAll(".delete-user-btn").forEach((btn) => {
+    btn.addEventListener("click", () => deleteUser(btn.dataset.id, btn.dataset.email));
+  });
 }
 
 function rowTemplate(user) {
+  const isSelf = user.id === auth.session.user.id;
   return `
     <tr data-id="${escapeHtml(user.id)}">
       <td>${escapeHtml(user.email)}</td>
@@ -61,6 +65,9 @@ function rowTemplate(user) {
         <button class="secondary save-user-btn" data-id="${escapeHtml(user.id)}">Guardar</button>
         <span class="save-feedback"></span>
       </td>
+      <td>
+        ${isSelf ? "" : `<button class="secondary danger delete-user-btn" data-id="${escapeHtml(user.id)}" data-email="${escapeHtml(user.email)}">Eliminar</button>`}
+      </td>
     </tr>
   `;
 }
@@ -75,6 +82,35 @@ async function saveUser(id) {
   feedback.textContent = "Guardando...";
   const { error } = await supabase.from("profiles").update({ nombre, role, activo }).eq("id", id);
   feedback.textContent = error ? `Error: ${error.message}` : "Guardado.";
+}
+
+async function deleteUser(id, email) {
+  if (!confirm(`¿Eliminar al usuario ${email}? Esta acción no se puede deshacer.`)) return;
+
+  const row = usersBody.querySelector(`tr[data-id="${id}"]`);
+  const feedback = row.querySelector(".save-feedback");
+  feedback.textContent = "Eliminando...";
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/admin-create-user`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ id }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error ?? "Error desconocido");
+
+    await loadUsers();
+  } catch (err) {
+    feedback.textContent = `Error: ${err.message}`;
+  }
 }
 
 createForm.addEventListener("submit", async (event) => {

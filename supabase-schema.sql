@@ -80,8 +80,35 @@ create policy "superadmin edita cualquier perfil"
   using (is_superadmin())
   with check (is_superadmin());
 
+-- Obras activas/inactivas, seleccionables al crear una orden
+create table if not exists obras (
+  id uuid primary key default gen_random_uuid(),
+  nombre text not null,
+  activa boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+alter table obras enable row level security;
+
+create policy "usuarios activos ven obras"
+  on obras for select
+  to authenticated
+  using (is_active_user());
+
+create policy "staff crea obras"
+  on obras for insert
+  to authenticated
+  with check (is_staff());
+
+create policy "staff actualiza obras"
+  on obras for update
+  to authenticated
+  using (is_staff())
+  with check (is_staff());
+
 create table if not exists ordenes (
   id uuid primary key default gen_random_uuid(),
+  obra_id uuid references obras(id),
   piso text not null,
   contratista text not null,
   fecha_hora timestamptz not null,
@@ -104,6 +131,11 @@ create policy "empleados ven las suyas, staff ve todas"
   to authenticated
   using (creado_por_id = auth.uid() or is_staff());
 
+create policy "staff elimina ordenes"
+  on ordenes for delete
+  to authenticated
+  using (is_staff());
+
 create policy "activos suben evidencia"
   on storage.objects for insert
   to authenticated
@@ -111,6 +143,11 @@ create policy "activos suben evidencia"
 
 create policy "solo staff ve evidencia"
   on storage.objects for select
+  to authenticated
+  using (bucket_id = 'evidencias' and is_staff());
+
+create policy "staff elimina evidencia"
+  on storage.objects for delete
   to authenticated
   using (bucket_id = 'evidencias' and is_staff());
 

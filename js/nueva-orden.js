@@ -3,8 +3,11 @@ import { requireActiveProfile, landingPageFor } from "./auth.js";
 import { renderHeader } from "./layout.js";
 import { wireDropZone } from "./drop-zone.js";
 import { compressImage } from "./image-compression.js";
+import { loadObras } from "./obras.js";
+import { escapeHtml } from "./escape-html.js";
 
 const form = document.getElementById("order-form");
+const obraSelect = document.getElementById("obra");
 const submitBtn = document.getElementById("submit-btn");
 const statusEl = document.getElementById("status");
 const fechaHoraInput = document.getElementById("fecha-hora");
@@ -23,6 +26,14 @@ if (auth) {
   setDefaultFechaHora();
   setupStage("antes");
   setupStage("despues");
+  await loadObraOptions();
+}
+
+async function loadObraOptions() {
+  const obras = await loadObras({ soloActivas: true });
+  obraSelect.innerHTML =
+    `<option value="">Selecciona una obra</option>` +
+    obras.map((obra) => `<option value="${escapeHtml(obra.id)}">${escapeHtml(obra.nombre)}</option>`).join("");
 }
 
 function setDefaultFechaHora() {
@@ -105,6 +116,7 @@ form.addEventListener("submit", async (event) => {
 
     const { error } = await supabase.from("ordenes").insert({
       id: orderId,
+      obra_id: obraSelect.value || null,
       piso: document.getElementById("piso").value.trim(),
       contratista: document.getElementById("contratista").value.trim(),
       fecha_hora: fechaHoraInput.value,

@@ -9,7 +9,7 @@ const ALLOWED_ROLES = ["empleado", "admin", "superadmin"];
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "POST, DELETE, OPTIONS",
 };
 
 function jsonResponse(body: unknown, status: number) {
@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: CORS_HEADERS });
   }
 
-  if (req.method !== "POST") {
+  if (req.method !== "POST" && req.method !== "DELETE") {
     return jsonResponse({ error: "Método no permitido" }, 405);
   }
 
@@ -54,6 +54,28 @@ Deno.serve(async (req) => {
 
   if (!callerProfile || callerProfile.role !== "superadmin" || !callerProfile.activo) {
     return jsonResponse({ error: "No autorizado" }, 403);
+  }
+
+  if (req.method === "DELETE") {
+    let deleteBody: { id?: string };
+    try {
+      deleteBody = await req.json();
+    } catch {
+      return jsonResponse({ error: "Body inválido" }, 400);
+    }
+
+    if (!deleteBody.id) {
+      return jsonResponse({ error: "Falta el id del usuario" }, 400);
+    }
+    if (deleteBody.id === caller.id) {
+      return jsonResponse({ error: "No puedes eliminar tu propia cuenta" }, 400);
+    }
+
+    const { error: deleteError } = await adminClient.auth.admin.deleteUser(deleteBody.id);
+    if (deleteError) {
+      return jsonResponse({ error: deleteError.message }, 400);
+    }
+    return jsonResponse({ id: deleteBody.id }, 200);
   }
 
   let body: { email?: string; password?: string; nombre?: string; role?: string };

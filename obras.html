@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Obras — Gestión de Aseo de Obra</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <div class="panel-header">
+      <h2>Obras</h2>
+      <div>
+        <button class="secondary" id="refresh-obras-btn">Actualizar</button>
+        <button id="open-create-obra-btn">+ Crear obra</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Activa</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="obras-body">
+          <tr><td colspan="3" class="empty-state">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <dialog id="create-obra-modal">
+    <h3>Crear obra</h3>
+    <form id="create-obra-form" novalidate>
+      <label for="new-obra-nombre">Nombre de la obra</label>
+      <input id="new-obra-nombre" type="text" required />
+
+      <div class="modal-actions">
+        <button type="submit">Crear obra</button>
+        <button type="button" class="secondary" id="create-obra-cancel">Cancelar</button>
+      </div>
+      <p id="create-obra-status" role="status"></p>
+    </form>
+  </dialog>
+
+  <script type="module" src="js/obras-admin.js"></script>
+</body>
+</html>

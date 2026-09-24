@@ -18,17 +18,17 @@ if (auth) {
 async function loadMyOrders(userId) {
   const { data, error } = await supabase
     .from("ordenes")
-    .select("*")
+    .select("*, obras(nombre)")
     .eq("creado_por_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) {
-    tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">Error cargando órdenes: ${escapeHtml(error.message)}</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Error cargando órdenes: ${escapeHtml(error.message)}</td></tr>`;
     return;
   }
 
   if (data.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">Aún no has registrado ninguna orden.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Aún no has registrado ninguna orden.</td></tr>`;
     return;
   }
 
@@ -38,6 +38,7 @@ async function loadMyOrders(userId) {
       return `
         <tr>
           <td>${escapeHtml(order.fecha_hora)}</td>
+          <td>${escapeHtml(order.obras?.nombre) || "-"}</td>
           <td>${escapeHtml(order.piso)}</td>
           <td>${escapeHtml(order.contratista)}</td>
           <td>${(order.fotos_antes ?? []).length} / ${(order.fotos_despues ?? []).length}</td>
