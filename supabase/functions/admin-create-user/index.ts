@@ -6,14 +6,24 @@ const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
 const ALLOWED_ROLES = ["empleado", "admin", "superadmin"];
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 function jsonResponse(body: unknown, status: number) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
   });
 }
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: CORS_HEADERS });
+  }
+
   if (req.method !== "POST") {
     return jsonResponse({ error: "Método no permitido" }, 405);
   }
