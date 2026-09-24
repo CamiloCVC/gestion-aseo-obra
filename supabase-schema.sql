@@ -106,6 +106,11 @@ create policy "staff actualiza obras"
   using (is_staff())
   with check (is_staff());
 
+create policy "staff elimina obras"
+  on obras for delete
+  to authenticated
+  using (is_staff());
+
 create table if not exists ordenes (
   id uuid primary key default gen_random_uuid(),
   obra_id uuid references obras(id),
