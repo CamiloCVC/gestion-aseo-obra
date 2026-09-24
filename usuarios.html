@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usuarios — Gestión de Aseo de Obra</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <h2>Crear usuario</h2>
+    <form id="create-user-form" class="inline-form" novalidate>
+      <input id="new-email" type="email" placeholder="Correo" required />
+      <input id="new-nombre" type="text" placeholder="Nombre" required />
+      <input id="new-password" type="password" placeholder="Contraseña temporal" required minlength="6" />
+      <select id="new-role">
+        <option value="empleado">Empleado</option>
+        <option value="admin">Admin</option>
+        <option value="superadmin">Superadmin</option>
+      </select>
+      <button type="submit">Crear usuario</button>
+    </form>
+    <p id="create-status" role="status"></p>
+
+    <div class="panel-header">
+      <h2>Usuarios</h2>
+      <button class="secondary" id="refresh-users-btn">Actualizar</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Correo</th>
+            <th>Nombre</th>
+            <th>Rol</th>
+            <th>Activo</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="users-body">
+          <tr><td colspan="5" class="empty-state">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script type="module" src="js/usuarios.js"></script>
+</body>
+</html>

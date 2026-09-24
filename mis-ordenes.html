@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis órdenes — Gestión de Aseo de Obra</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <div class="panel-header">
+      <h2>Mis órdenes</h2>
+      <a class="button-link" href="nueva-orden.html">+ Nueva orden</a>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha/hora</th>
+            <th>Piso/Lugar</th>
+            <th>Contratista</th>
+            <th>Fotos (antes/después)</th>
+          </tr>
+        </thead>
+        <tbody id="orders-body">
+          <tr><td colspan="4" class="empty-state">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script type="module" src="js/mis-ordenes.js"></script>
+</body>
+</html>

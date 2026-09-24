@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nueva orden — Gestión de Aseo de Obra</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <h2>Nueva orden de limpieza</h2>
+
+    <form id="order-form" novalidate>
+      <fieldset>
+        <label for="piso">Piso / Lugar</label>
+        <input id="piso" name="piso" type="text" placeholder="Ej. Piso 4 - Ala norte" required />
+
+        <label for="contratista">Contratista responsable de los residuos</label>
+        <input id="contratista" name="contratista" type="text" placeholder="Nombre del contratista" required />
+
+        <label for="fecha-hora">Fecha y hora</label>
+        <input id="fecha-hora" name="fecha-hora" type="datetime-local" required />
+
+        <label for="fotos-antes">Fotos: antes de limpiar</label>
+        <input id="fotos-antes" name="fotos-antes" type="file" accept="image/*" capture="environment" multiple required />
+
+        <label for="fotos-despues">Fotos: después de limpiar</label>
+        <input id="fotos-despues" name="fotos-despues" type="file" accept="image/*" capture="environment" multiple required />
+
+        <label for="comentarios">Comentarios (opcional)</label>
+        <textarea id="comentarios" name="comentarios" placeholder="Detalles adicionales"></textarea>
+      </fieldset>
+
+      <button type="submit" id="submit-btn">Registrar orden</button>
+      <p id="status" role="status"></p>
+    </form>
+  </main>
+
+  <script type="module" src="js/nueva-orden.js"></script>
+</body>
+</html>

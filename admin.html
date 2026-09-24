@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Órdenes — Gestión de Aseo de Obra</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <div class="panel-header">
+      <h2>Todas las órdenes</h2>
+      <div>
+        <button class="secondary" id="refresh-btn">Actualizar</button>
+        <a class="button-link" href="nueva-orden.html">+ Nueva orden</a>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha/hora</th>
+            <th>Piso/Lugar</th>
+            <th>Contratista</th>
+            <th>Creado por</th>
+            <th>Fotos (antes/después)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="orders-body">
+          <tr><td colspan="6" class="empty-state">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <dialog id="detail-modal">
+    <div id="modal-body"></div>
+    <button class="secondary" id="modal-close">Cerrar</button>
+  </dialog>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
