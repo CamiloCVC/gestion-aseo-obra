@@ -45,7 +45,7 @@ async function loadMyOrders(userId) {
           <td>${escapeHtml(order.contratista)}</td>
           <td>${(order.fotos_antes ?? []).length} / ${(order.fotos_despues ?? []).length}</td>
           <td><span class="badge ${isPending ? "badge-pendiente" : "badge-completa"}">${isPending ? "Pendiente" : "Completa"}</span></td>
-          <td class="icon-actions">${isPending ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}</td>
+          <td><div class="icon-actions">${isPending ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}</div></td>
         </tr>
       `;
     })

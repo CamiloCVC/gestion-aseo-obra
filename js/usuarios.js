@@ -19,6 +19,8 @@ const editActivoInput = document.getElementById("edit-user-activo");
 
 let editingId = null;
 
+const ROLE_LABELS = { empleado: "Empleado", admin: "Admin", superadmin: "Superadmin" };
+
 document.getElementById("open-create-user-btn").addEventListener("click", () => {
   createForm.reset();
   createModal.showModal();
@@ -59,8 +61,6 @@ async function loadUsers() {
   renderIcons();
 }
 
-const ROLE_LABELS = { empleado: "Empleado", admin: "Admin", superadmin: "Superadmin" };
-
 function rowTemplate(user) {
   const isSelf = user.id === auth.session.user.id;
   return `
@@ -69,10 +69,10 @@ function rowTemplate(user) {
       <td>${escapeHtml(user.nombre)}</td>
       <td>${ROLE_LABELS[user.role] ?? escapeHtml(user.role)}</td>
       <td><span class="badge ${user.activo ? "badge-completa" : "badge-pendiente"}">${user.activo ? "Activo" : "Inactivo"}</span></td>
-      <td class="icon-actions">
+      <td><div class="icon-actions">
         <button class="icon-btn edit-user-btn" data-id="${escapeHtml(user.id)}" data-nombre="${escapeHtml(user.nombre)}" data-role="${escapeHtml(user.role)}" data-activo="${user.activo}" data-tooltip="Editar usuario" aria-label="Editar usuario"><i data-lucide="pencil"></i></button>
         ${isSelf ? "" : `<button class="icon-btn icon-btn-danger delete-user-btn" data-id="${escapeHtml(user.id)}" data-email="${escapeHtml(user.email)}" data-tooltip="Eliminar usuario" aria-label="Eliminar usuario"><i data-lucide="trash-2"></i></button>`}
-      </td>
+      </div></td>
     </tr>
   `;
 }

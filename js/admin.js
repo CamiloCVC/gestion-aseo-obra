@@ -118,11 +118,11 @@ function renderOrders(data) {
       <td>${escapeHtml(order.profiles?.nombre)}</td>
       <td>${(order.fotos_antes ?? []).length} / ${(order.fotos_despues ?? []).length}</td>
       <td><span class="badge ${isPending ? "badge-pendiente" : "badge-completa"}">${isPending ? "Pendiente" : "Completa"}</span></td>
-      <td class="icon-actions">
+      <td><div class="icon-actions">
         <button class="icon-btn ver-btn" data-tooltip="Ver detalle" aria-label="Ver detalle"><i data-lucide="eye"></i></button>
         ${isPending && isOwn ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}
         <button class="icon-btn icon-btn-danger delete-btn" data-tooltip="Eliminar orden" aria-label="Eliminar orden"><i data-lucide="trash-2"></i></button>
-      </td>
+      </div></td>
     `;
     row.querySelector(".ver-btn").addEventListener("click", () => openDetail(order));
     row.querySelector(".delete-btn").addEventListener("click", () => deleteOrder(order));

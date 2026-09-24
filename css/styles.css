@@ -432,9 +432,12 @@ button.danger:hover {
 }
 
 .evidence-fieldset legend {
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--space-sm);
   font-weight: 600;
   font-size: 0.82rem;
-  padding: 0 0.35rem;
   color: var(--color-text);
 }
 
