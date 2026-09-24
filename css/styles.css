@@ -1,21 +1,21 @@
 :root {
-  /* Light — daylight concrete/blueprint */
-  --color-surface: #eeece5;
-  --color-surface-raised: #fcfbf8;
-  --color-text: #1b1a17;
-  --color-muted: #6d675c;
-  --color-border: #d6d0c2;
-  --grid-line: rgb(0 0 0 / 0.035);
+  /* Light — quiet neutral surface, single muted accent */
+  --color-surface: #f6f6f3;
+  --color-surface-raised: #ffffff;
+  --color-text: #1d1d1b;
+  --color-muted: #6c6c66;
+  --color-border: #e3e2dc;
 
-  --color-primary: #1c1e22;
-  --color-primary-contrast: #f4f2ec;
-  --color-accent: #ff5a1f;
-  --color-accent-contrast: #1b1a17;
-  --color-caution: #ffb400;
-  --color-danger: #c92a2a;
-  --color-success: #1f7a43;
+  --color-primary: #24262a;
+  --color-primary-contrast: #f4f4f2;
+  --color-accent: #2f6f5e;
+  --color-accent-contrast: #ffffff;
+  --color-caution: #a9760f;
+  --color-caution-bg: #f5e6c8;
+  --color-danger: #a8402c;
+  --color-success: #2f6f5e;
+  --color-success-bg: #dcece5;
 
-  --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
   --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
@@ -24,30 +24,29 @@
   --space-md: 1.5rem;
   --space-lg: 2.5rem;
 
-  --radius: 4px;
-  --cut: 14px;
-  --cut-sm: 8px;
-  --duration-fast: 150ms;
-  --duration-med: 260ms;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --duration-fast: 130ms;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-surface: #14161a;
-    --color-surface-raised: #1b1e23;
-    --color-text: #ece9e1;
-    --color-muted: #94908a;
-    --color-border: #33363c;
-    --grid-line: rgb(255 255 255 / 0.04);
+    --color-surface: #17181a;
+    --color-surface-raised: #1e2023;
+    --color-text: #e8e7e3;
+    --color-muted: #9a9a93;
+    --color-border: #323436;
 
-    --color-primary: #0e0f11;
-    --color-primary-contrast: #f4f2ec;
-    --color-accent: #ff7a3d;
-    --color-accent-contrast: #14161a;
-    --color-caution: #ffc94d;
-    --color-danger: #ff6b6b;
-    --color-success: #4fd685;
+    --color-primary: #101113;
+    --color-primary-contrast: #f0efec;
+    --color-accent: #4fa78a;
+    --color-accent-contrast: #0f1210;
+    --color-caution: #d9ac57;
+    --color-caution-bg: #3a3020;
+    --color-danger: #e0806e;
+    --color-success: #4fa78a;
+    --color-success-bg: #1d332b;
   }
 }
 
@@ -57,13 +56,10 @@
 
 body {
   margin: 0;
-  background-color: var(--color-surface);
-  background-image:
-    repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 28px),
-    repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 28px);
+  background: var(--color-surface);
   color: var(--color-text);
   font-family: var(--font-body);
-  line-height: 1.5;
+  line-height: 1.55;
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
 }
@@ -85,27 +81,24 @@ main {
 }
 
 h1, h2, h3, h4 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
   margin: 0 0 var(--space-sm);
 }
 
 h2 {
-  font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
-  padding-bottom: 0.4rem;
-  border-bottom: 3px solid var(--color-accent);
-  display: inline-block;
+  font-size: 1.3rem;
+  color: var(--color-text);
 }
 
 h3 {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
 }
 
 h4 {
-  font-size: 0.95rem;
-  letter-spacing: 0.06em;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--color-muted);
 }
 
@@ -115,37 +108,15 @@ h4 {
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  padding: 0.85rem var(--space-md);
+  padding: 0.75rem var(--space-md);
   background: var(--color-primary);
   color: var(--color-primary-contrast);
-  border-bottom: 4px solid;
-  border-image: repeating-linear-gradient(
-      -45deg,
-      var(--color-accent) 0 10px,
-      transparent 10px 20px
-    )
-    4;
-  position: relative;
 }
 
 .topbar-brand {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.15rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-weight: 600;
+  font-size: 0.95rem;
   white-space: nowrap;
-}
-
-.topbar-brand::before {
-  content: "";
-  display: inline-block;
-  width: 0.6rem;
-  height: 0.6rem;
-  margin-right: 0.5rem;
-  background: var(--color-accent);
-  transform: rotate(45deg);
-  vertical-align: middle;
 }
 
 .topbar-nav {
@@ -157,12 +128,10 @@ h4 {
 }
 
 .topbar-nav a {
-  color: rgb(244 242 236 / 0.65);
+  color: rgb(244 244 242 / 0.6);
   text-decoration: none;
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+  font-weight: 500;
   padding: 0.3rem 0;
   border-bottom: 2px solid transparent;
   transition: color var(--duration-fast) var(--ease-out-expo);
@@ -173,7 +142,7 @@ h4 {
 }
 
 .topbar-nav a.active {
-  color: var(--color-accent);
+  color: var(--color-primary-contrast);
   border-bottom-color: var(--color-accent);
 }
 
@@ -188,58 +157,53 @@ h4 {
 
 .topbar-name {
   font-size: 0.82rem;
-  color: rgb(244 242 236 / 0.85);
+  color: rgb(244 244 242 / 0.75);
 }
 
 .topbar button.secondary {
   color: var(--color-primary-contrast);
-  border-color: rgb(244 242 236 / 0.3);
+  border-color: rgb(244 244 242 / 0.25);
 }
 
 .topbar button.secondary:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
+  border-color: rgb(244 244 242 / 0.5);
+  color: var(--color-primary-contrast);
 }
 
 .badge {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.2rem 0.55rem 0.2rem 0.5rem;
-  background: rgb(244 242 236 / 0.12);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgb(244 244 242 / 0.14);
   color: var(--color-primary-contrast);
-  border-left: 3px solid var(--color-accent);
 }
 
 .badge-superadmin {
-  border-left-color: var(--color-accent);
-  background: rgb(255 90 31 / 0.18);
+  background: rgb(244 244 242 / 0.18);
 }
 
 .badge-admin {
-  border-left-color: #4f8ff0;
-  background: rgb(79 143 240 / 0.16);
+  background: rgb(244 244 242 / 0.18);
 }
 
 .badge-empleado {
-  border-left-color: #94908a;
+  background: rgb(244 244 242 / 0.12);
 }
 
 .badge-pendiente,
 .badge-completa {
-  color: var(--color-text);
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
+  border-radius: 999px;
 }
 
 .badge-pendiente {
-  border-left: 3px solid var(--color-caution);
+  color: var(--color-caution);
+  background: var(--color-caution-bg);
 }
 
 .badge-completa {
-  border-left: 3px solid var(--color-success);
+  color: var(--color-success);
+  background: var(--color-success-bg);
 }
 
 /* Auth page */
@@ -254,43 +218,17 @@ h4 {
 
 .auth-card {
   width: 100%;
-  max-width: 380px;
+  max-width: 360px;
   padding: var(--space-lg) var(--space-md) var(--space-md);
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
-  border-top: 4px solid var(--color-accent);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
-  box-shadow: 0 20px 60px -20px rgb(0 0 0 / 0.35);
-  animation: rise var(--duration-med) var(--ease-out-expo) both;
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.auth-kicker {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-accent);
-  margin: 0 0 0.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px -16px rgb(0 0 0 / 0.18);
 }
 
 .auth-card h1 {
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   margin: 0 0 0.35rem;
-  border: none;
-  padding: 0;
-  line-height: 1.05;
 }
 
 .auth-subtitle {
@@ -314,11 +252,9 @@ fieldset {
 
 label {
   display: block;
-  font-weight: 600;
+  font-weight: 500;
   margin-bottom: var(--space-xs);
-  font-size: 0.76rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.82rem;
   color: var(--color-muted);
 }
 
@@ -326,13 +262,13 @@ input,
 textarea,
 select {
   width: 100%;
-  padding: 0.6rem 0.75rem;
+  padding: 0.55rem 0.7rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-surface-raised);
   color: var(--color-text);
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   margin-bottom: var(--space-sm);
   transition: border-color var(--duration-fast) var(--ease-out-expo);
 }
@@ -340,7 +276,7 @@ select {
 input:hover,
 textarea:hover,
 select:hover {
-  border-color: var(--color-muted);
+  border-color: #b9b8b0;
 }
 
 input:focus,
@@ -358,58 +294,47 @@ textarea {
 button {
   cursor: pointer;
   border: none;
-  border-radius: 0;
-  clip-path: polygon(var(--cut-sm) 0, 100% 0, 100% calc(100% - var(--cut-sm)), calc(100% - var(--cut-sm)) 100%, 0 100%, 0 var(--cut-sm));
-  padding: 0.62rem 1.2rem;
+  border-radius: var(--radius);
+  padding: 0.55rem 1rem;
   font-family: var(--font-body);
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 0.86rem;
+  font-weight: 600;
   background: var(--color-accent);
   color: var(--color-accent-contrast);
-  transition: filter var(--duration-fast) var(--ease-out-expo), transform var(--duration-fast) var(--ease-out-expo);
+  transition: background var(--duration-fast) var(--ease-out-expo);
 }
 
 button:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
-}
-
-button:active {
-  transform: translateY(0);
+  background: color-mix(in srgb, var(--color-accent) 88%, black);
 }
 
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
 button.secondary {
   background: transparent;
   color: var(--color-text);
   border: 1px solid var(--color-border);
-  padding: calc(0.62rem - 1px) calc(1.2rem - 1px);
+  padding: calc(0.55rem - 1px) calc(1rem - 1px);
 }
 
 button.secondary:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  filter: none;
+  border-color: #b9b8b0;
+  background: var(--color-surface);
 }
 
 button.danger {
   background: transparent;
   color: var(--color-danger);
   border: 1px solid var(--color-danger);
-  padding: calc(0.62rem - 1px) calc(1.2rem - 1px);
+  padding: calc(0.55rem - 1px) calc(1rem - 1px);
 }
 
 button.danger:hover {
   background: var(--color-danger);
-  color: var(--color-surface-raised);
-  filter: none;
+  color: #fff;
 }
 
 .button-link {
@@ -417,25 +342,21 @@ button.danger:hover {
   background: var(--color-accent);
   color: var(--color-accent-contrast);
   text-decoration: none;
-  padding: 0.55rem 1.2rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  clip-path: polygon(var(--cut-sm) 0, 100% 0, 100% calc(100% - var(--cut-sm)), calc(100% - var(--cut-sm)) 100%, 0 100%, 0 var(--cut-sm));
-  transition: filter var(--duration-fast) var(--ease-out-expo), transform var(--duration-fast) var(--ease-out-expo);
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius);
+  font-size: 0.86rem;
+  font-weight: 600;
+  transition: background var(--duration-fast) var(--ease-out-expo);
 }
 
 .button-link:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--color-accent) 88%, black);
 }
 
 .form-card {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
-  border-top: 3px solid var(--color-accent);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  border-radius: var(--radius-lg);
   padding: var(--space-md);
   margin-bottom: var(--space-md);
 }
@@ -455,31 +376,27 @@ button.danger:hover {
 
 .evidence-fieldset {
   border: 1px solid var(--color-border);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-sm)), calc(100% - var(--cut-sm)) 100%, 0 100%);
+  border-radius: var(--radius-lg);
   padding: var(--space-sm);
   background: var(--color-surface-raised);
 }
 
 .evidence-fieldset legend {
-  font-family: var(--font-mono);
   font-weight: 600;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.82rem;
   padding: 0 0.35rem;
-  color: var(--color-muted);
+  color: var(--color-text);
 }
 
 .dropzone {
-  border: 2px dashed var(--color-border);
+  border: 1.5px dashed var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-md);
   text-align: center;
   cursor: pointer;
   color: var(--color-muted);
   transition: border-color var(--duration-fast) var(--ease-out-expo),
-    background var(--duration-fast) var(--ease-out-expo),
-    transform var(--duration-fast) var(--ease-out-expo);
+    background var(--duration-fast) var(--ease-out-expo);
 }
 
 .dropzone p {
@@ -500,9 +417,8 @@ button.danger:hover {
 
 .dropzone.drag-active {
   border-color: var(--color-accent);
-  background: rgb(255 90 31 / 0.07);
+  background: color-mix(in srgb, var(--color-accent) 6%, transparent);
   color: var(--color-text);
-  transform: scale(1.01);
 }
 
 .thumb-grid {
@@ -533,7 +449,6 @@ button.danger:hover {
   width: 20px;
   height: 20px;
   padding: 0;
-  clip-path: none;
   border-radius: 999px;
   background: var(--color-danger);
   color: #fff;
@@ -565,10 +480,9 @@ button.danger:hover {
 }
 
 .carousel-nav {
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
   color: var(--color-text);
   border: 1px solid var(--color-border);
-  clip-path: none;
   border-radius: 999px;
   width: 32px;
   height: 32px;
@@ -580,14 +494,14 @@ button.danger:hover {
 .carousel-nav:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
+  background: var(--color-surface-raised);
 }
 
 .carousel-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--color-muted);
   margin-bottom: var(--space-md);
 }
@@ -606,6 +520,7 @@ button.danger:hover {
   align-items: start;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: var(--space-sm);
   margin-bottom: var(--space-md);
 }
@@ -656,8 +571,7 @@ button.danger:hover {
 .table-wrap {
   overflow-x: auto;
   border: 1px solid var(--color-border);
-  border-top: 3px solid var(--color-accent);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  border-radius: var(--radius-lg);
   background: var(--color-surface-raised);
 }
 
@@ -676,13 +590,12 @@ td {
 }
 
 th {
-  background: var(--color-primary);
-  color: rgb(244 242 236 / 0.8);
+  background: var(--color-surface);
+  color: var(--color-muted);
   font-weight: 600;
-  font-size: 0.7rem;
-  font-family: var(--font-mono);
+  font-size: 0.74rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 td {
@@ -694,13 +607,11 @@ tbody tr:last-child td {
 }
 
 tbody tr {
-  border-left: 3px solid transparent;
-  transition: border-color var(--duration-fast) var(--ease-out-expo), background var(--duration-fast) var(--ease-out-expo);
+  transition: background var(--duration-fast) var(--ease-out-expo);
 }
 
 tbody tr:hover {
   background: var(--color-surface);
-  border-left-color: var(--color-accent);
 }
 
 .empty-state {
@@ -719,23 +630,17 @@ tbody tr:hover {
 
 dialog {
   border: none;
-  border-top: 4px solid var(--color-accent);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  border-radius: var(--radius-lg);
   padding: var(--space-md);
   max-width: 560px;
   width: 90vw;
   color: var(--color-text);
   background: var(--color-surface-raised);
-  box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.5);
-}
-
-dialog[open] {
-  animation: rise var(--duration-med) var(--ease-out-expo) both;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 20px 48px -16px rgb(0 0 0 / 0.28);
 }
 
 dialog::backdrop {
-  background: rgb(10 10 8 / 0.6);
-  backdrop-filter: blur(2px);
+  background: rgb(20 20 18 / 0.4);
 }
 
 .gallery h4 {
