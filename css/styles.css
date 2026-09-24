@@ -150,8 +150,10 @@ h4 {
 
 .topbar-nav {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-md);
   flex: 1;
+  min-width: 0;
 }
 
 .topbar-nav a {
@@ -177,9 +179,11 @@ h4 {
 
 .topbar-user {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--space-xs);
-  white-space: nowrap;
+  min-width: 0;
 }
 
 .topbar-name {
@@ -551,6 +555,7 @@ button.danger:hover {
 
 .carousel-image {
   flex: 1;
+  min-width: 0;
   max-height: 260px;
   width: 100%;
   object-fit: contain;
@@ -757,10 +762,20 @@ dialog::backdrop {
     flex-wrap: wrap;
   }
 
+  .topbar-brand {
+    width: 100%;
+  }
+
   .topbar-nav {
     order: 3;
     width: 100%;
     gap: var(--space-sm);
+  }
+
+  .topbar-user {
+    order: 2;
+    width: 100%;
+    justify-content: space-between;
   }
 
   .panel-header {
