@@ -2,6 +2,7 @@ import { supabase } from "./supabase-client.js";
 import { requireRole } from "./auth.js";
 import { renderHeader } from "./layout.js";
 import { escapeHtml } from "./escape-html.js";
+import { renderCarousel } from "./carousel.js";
 
 const tableBody = document.getElementById("orders-body");
 const modal = document.getElementById("detail-modal");
@@ -61,11 +62,6 @@ async function signedUrls(paths) {
   return data.map((entry) => entry.signedUrl).filter(Boolean);
 }
 
-function renderThumbs(urls) {
-  if (!urls || urls.length === 0) return "Sin fotos";
-  return urls.map((url) => `<img src="${escapeHtml(url)}" alt="Evidencia">`).join("");
-}
-
 async function openDetail(order) {
   modalBody.innerHTML = "<p>Cargando fotos...</p>";
   modal.showModal();
@@ -82,9 +78,12 @@ async function openDetail(order) {
     <p><strong>Fecha y hora:</strong> ${escapeHtml(order.fecha_hora)}</p>
     <p><strong>Creado por:</strong> ${escapeHtml(order.profiles?.nombre)} (${escapeHtml(order.profiles?.email)})</p>
     <p><strong>Comentarios:</strong> ${escapeHtml(order.comentarios) || "-"}</p>
-    <div class="gallery"><h4>Antes</h4><div class="thumbs">${renderThumbs(antesUrls)}</div></div>
-    <div class="gallery"><h4>Después</h4><div class="thumbs">${renderThumbs(despuesUrls)}</div></div>
+    <div class="gallery"><h4>Antes</h4><div id="carousel-antes"></div></div>
+    <div class="gallery"><h4>Después</h4><div id="carousel-despues"></div></div>
   `;
+
+  renderCarousel(document.getElementById("carousel-antes"), antesUrls, "antes");
+  renderCarousel(document.getElementById("carousel-despues"), despuesUrls, "despues");
 }
 
 modalClose.addEventListener("click", () => modal.close());

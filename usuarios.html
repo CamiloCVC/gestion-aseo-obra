@@ -10,23 +10,12 @@
   <div id="app-header"></div>
 
   <main>
-    <h2>Crear usuario</h2>
-    <form id="create-user-form" class="inline-form" novalidate>
-      <input id="new-email" type="email" placeholder="Correo" required />
-      <input id="new-nombre" type="text" placeholder="Nombre" required />
-      <input id="new-password" type="password" placeholder="Contraseña temporal" required minlength="6" />
-      <select id="new-role">
-        <option value="empleado">Empleado</option>
-        <option value="admin">Admin</option>
-        <option value="superadmin">Superadmin</option>
-      </select>
-      <button type="submit">Crear usuario</button>
-    </form>
-    <p id="create-status" role="status"></p>
-
     <div class="panel-header">
       <h2>Usuarios</h2>
-      <button class="secondary" id="refresh-users-btn">Actualizar</button>
+      <div>
+        <button class="secondary" id="refresh-users-btn">Actualizar</button>
+        <button id="open-create-user-btn">+ Crear usuario</button>
+      </div>
     </div>
 
     <div class="table-wrap">
@@ -46,6 +35,33 @@
       </table>
     </div>
   </main>
+
+  <dialog id="create-user-modal">
+    <h3>Crear usuario</h3>
+    <form id="create-user-form" novalidate>
+      <label for="new-email">Correo</label>
+      <input id="new-email" type="email" required />
+
+      <label for="new-nombre">Nombre</label>
+      <input id="new-nombre" type="text" required />
+
+      <label for="new-password">Contraseña temporal</label>
+      <input id="new-password" type="password" required minlength="6" />
+
+      <label for="new-role">Rol</label>
+      <select id="new-role">
+        <option value="empleado">Empleado</option>
+        <option value="admin">Admin</option>
+        <option value="superadmin">Superadmin</option>
+      </select>
+
+      <div class="modal-actions">
+        <button type="submit">Crear usuario</button>
+        <button type="button" class="secondary" id="create-user-cancel">Cancelar</button>
+      </div>
+      <p id="create-status" role="status"></p>
+    </form>
+  </dialog>
 
   <script type="module" src="js/usuarios.js"></script>
 </body>

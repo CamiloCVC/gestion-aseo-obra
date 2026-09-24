@@ -13,7 +13,7 @@
     <h2>Nueva orden de limpieza</h2>
 
     <form id="order-form" novalidate>
-      <fieldset>
+      <div class="form-card">
         <label for="piso">Piso / Lugar</label>
         <input id="piso" name="piso" type="text" placeholder="Ej. Piso 4 - Ala norte" required />
 
@@ -23,15 +23,31 @@
         <label for="fecha-hora">Fecha y hora</label>
         <input id="fecha-hora" name="fecha-hora" type="datetime-local" required />
 
-        <label for="fotos-antes">Fotos: antes de limpiar</label>
-        <input id="fotos-antes" name="fotos-antes" type="file" accept="image/*" capture="environment" multiple required />
-
-        <label for="fotos-despues">Fotos: después de limpiar</label>
-        <input id="fotos-despues" name="fotos-despues" type="file" accept="image/*" capture="environment" multiple required />
-
         <label for="comentarios">Comentarios (opcional)</label>
         <textarea id="comentarios" name="comentarios" placeholder="Detalles adicionales"></textarea>
-      </fieldset>
+      </div>
+
+      <div class="evidence-grid">
+        <fieldset class="evidence-fieldset">
+          <legend>Evidencia — antes de limpiar</legend>
+          <div class="dropzone" id="dropzone-antes" tabindex="0" role="button" aria-label="Adjuntar fotos de antes">
+            <p>Arrastra fotos aquí o haz clic para elegirlas</p>
+            <p class="dropzone-hint">Puedes adjuntar varias</p>
+          </div>
+          <input type="file" id="fotos-antes" accept="image/*" capture="environment" multiple hidden />
+          <div class="thumb-grid" id="preview-antes"></div>
+        </fieldset>
+
+        <fieldset class="evidence-fieldset">
+          <legend>Evidencia — después de limpiar</legend>
+          <div class="dropzone" id="dropzone-despues" tabindex="0" role="button" aria-label="Adjuntar fotos de después">
+            <p>Arrastra fotos aquí o haz clic para elegirlas</p>
+            <p class="dropzone-hint">Puedes adjuntar varias</p>
+          </div>
+          <input type="file" id="fotos-despues" accept="image/*" capture="environment" multiple hidden />
+          <div class="thumb-grid" id="preview-despues"></div>
+        </fieldset>
+      </div>
 
       <button type="submit" id="submit-btn">Registrar orden</button>
       <p id="status" role="status"></p>

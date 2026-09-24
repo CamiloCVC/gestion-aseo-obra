@@ -7,6 +7,13 @@ import { escapeHtml } from "./escape-html.js";
 const usersBody = document.getElementById("users-body");
 const createForm = document.getElementById("create-user-form");
 const createStatus = document.getElementById("create-status");
+const createModal = document.getElementById("create-user-modal");
+
+document.getElementById("open-create-user-btn").addEventListener("click", () => {
+  createStatus.textContent = "";
+  createModal.showModal();
+});
+document.getElementById("create-user-cancel").addEventListener("click", () => createModal.close());
 
 const auth = await requireRole(["superadmin"]);
 if (auth) {
@@ -98,6 +105,7 @@ createForm.addEventListener("submit", async (event) => {
     createStatus.textContent = `Usuario ${result.email} creado.`;
     createForm.reset();
     await loadUsers();
+    createModal.close();
   } catch (err) {
     createStatus.textContent = `Error: ${err.message}`;
   }

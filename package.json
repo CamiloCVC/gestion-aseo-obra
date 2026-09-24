@@ -1,0 +1,12 @@
+{
+  "name": "gestion-aseo-obra",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:unit": "vitest run tests/unit",
+    "test": "npm run test:unit"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.1"
+  }
+}

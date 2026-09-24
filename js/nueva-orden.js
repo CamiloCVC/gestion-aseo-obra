@@ -1,12 +1,15 @@
 import { supabase } from "./supabase-client.js";
 import { requireActiveProfile, landingPageFor } from "./auth.js";
 import { renderHeader } from "./layout.js";
+import { wireDropZone } from "./drop-zone.js";
+import { compressImage } from "./image-compression.js";
 
 const form = document.getElementById("order-form");
 const submitBtn = document.getElementById("submit-btn");
 const statusEl = document.getElementById("status");
 const fechaHoraInput = document.getElementById("fecha-hora");
 
+const state = { antes: [], despues: [] };
 let currentProfile = null;
 
 const auth = await requireActiveProfile();
@@ -18,6 +21,8 @@ if (auth) {
     activeHref: "nueva-orden.html",
   });
   setDefaultFechaHora();
+  setupStage("antes");
+  setupStage("despues");
 }
 
 function setDefaultFechaHora() {
@@ -26,11 +31,53 @@ function setDefaultFechaHora() {
     .slice(0, 16);
 }
 
+function setupStage(stage) {
+  const zone = document.getElementById(`dropzone-${stage}`);
+  const input = document.getElementById(`fotos-${stage}`);
+  wireDropZone(zone, input, (files) => addFiles(stage, files));
+}
+
+function addFiles(stage, files) {
+  const images = files.filter((file) => file.type.startsWith("image/"));
+  state[stage] = [...state[stage], ...images];
+  renderPreview(stage);
+}
+
+function removeFile(stage, index) {
+  state[stage] = state[stage].filter((_, i) => i !== index);
+  renderPreview(stage);
+}
+
+function renderPreview(stage) {
+  const container = document.getElementById(`preview-${stage}`);
+  container.innerHTML = "";
+  state[stage].forEach((file, index) => {
+    const item = document.createElement("div");
+    item.className = "thumb-item";
+
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.alt = `Vista previa ${index + 1}`;
+    item.appendChild(img);
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "thumb-remove";
+    removeBtn.setAttribute("aria-label", "Quitar foto");
+    removeBtn.textContent = "×";
+    removeBtn.addEventListener("click", () => removeFile(stage, index));
+    item.appendChild(removeBtn);
+
+    container.appendChild(item);
+  });
+}
+
 async function uploadPhotos(files, orderId, stage) {
   const paths = [];
   for (const file of files) {
-    const path = `ordenes/${orderId}/${stage}/${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from("evidencias").upload(path, file);
+    const compressed = await compressImage(file);
+    const path = `ordenes/${orderId}/${stage}/${Date.now()}-${compressed.name}`;
+    const { error } = await supabase.storage.from("evidencias").upload(path, compressed);
     if (error) throw error;
     paths.push(path);
   }
@@ -40,23 +87,20 @@ async function uploadPhotos(files, orderId, stage) {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const fotosAntes = Array.from(document.getElementById("fotos-antes").files);
-  const fotosDespues = Array.from(document.getElementById("fotos-despues").files);
-
-  if (fotosAntes.length === 0 || fotosDespues.length === 0) {
+  if (state.antes.length === 0 || state.despues.length === 0) {
     statusEl.textContent = "Debes adjuntar al menos una foto de antes y una de después.";
     return;
   }
 
   submitBtn.disabled = true;
-  statusEl.textContent = "Subiendo evidencia...";
+  statusEl.textContent = "Comprimiendo y subiendo evidencia...";
 
   const orderId = crypto.randomUUID();
 
   try {
     const [fotosAntesPaths, fotosDespuesPaths] = await Promise.all([
-      uploadPhotos(fotosAntes, orderId, "antes"),
-      uploadPhotos(fotosDespues, orderId, "despues"),
+      uploadPhotos(state.antes, orderId, "antes"),
+      uploadPhotos(state.despues, orderId, "despues"),
     ]);
 
     const { error } = await supabase.from("ordenes").insert({
@@ -73,7 +117,12 @@ form.addEventListener("submit", async (event) => {
     const backHref = landingPageFor(currentProfile?.role);
     const backLabel = backHref === "admin.html" ? "Ir a Órdenes" : "Ir a Mis órdenes";
     statusEl.innerHTML = `Orden registrada correctamente. <a href="${backHref}">${backLabel}</a>`;
+
     form.reset();
+    state.antes = [];
+    state.despues = [];
+    renderPreview("antes");
+    renderPreview("despues");
     setDefaultFechaHora();
   } catch (err) {
     statusEl.textContent = `Error: ${err.message}`;
