@@ -151,10 +151,20 @@ create policy "activos suben evidencia"
   to authenticated
   with check (bucket_id = 'evidencias' and (select is_active_user()));
 
-create policy "solo staff ve evidencia"
+create policy "staff o el dueño de la orden ve su evidencia"
   on storage.objects for select
   to authenticated
-  using (bucket_id = 'evidencias' and (select is_staff()));
+  using (
+    bucket_id = 'evidencias'
+    and (
+      (select is_staff())
+      or exists (
+        select 1 from ordenes o
+        where o.creado_por_id = (select auth.uid())
+          and o.id::text = (storage.foldername(objects.name))[2]
+      )
+    )
+  );
 
 create policy "staff elimina evidencia"
   on storage.objects for delete

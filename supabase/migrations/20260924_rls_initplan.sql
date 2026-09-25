@@ -27,9 +27,5 @@ alter policy "empleados ven las suyas, staff ve todas" on ordenes
 alter policy "staff elimina ordenes" on ordenes
   using ((select is_staff()));
 
-alter policy "activos suben evidencia" on storage.objects
-  with check (bucket_id = 'evidencias' and (select is_active_user()));
-alter policy "solo staff ve evidencia" on storage.objects
-  using (bucket_id = 'evidencias' and (select is_staff()));
-alter policy "staff elimina evidencia" on storage.objects
-  using (bucket_id = 'evidencias' and (select is_staff()));
+-- storage.objects: los nombres reales de las policies difieren del schema; se ajustan aparte
+-- una vez consultado pg_policies en el proyecto.
