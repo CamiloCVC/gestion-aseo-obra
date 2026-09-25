@@ -17,6 +17,7 @@ const hastaInput = document.getElementById("filter-hasta");
 let currentPage = 1;
 let totalOrders = 0;
 let requestSeq = 0;
+let appliedFilters = {};
 
 const auth = await requireActiveProfile();
 if (auth) {
@@ -25,32 +26,38 @@ if (auth) {
     profile: auth.profile,
     activeHref: "mis-ordenes.html",
   });
+  appliedFilters = readFilters();
   await loadMyOrders(1);
 }
 
-[desdeInput, hastaInput].forEach((el) => el.addEventListener("change", () => loadMyOrders(1)));
-document.getElementById("filter-clear").addEventListener("click", () => {
-  desdeInput.value = "";
-  hastaInput.value = "";
-  loadMyOrders(1);
-});
-
-async function loadMyOrders(page = currentPage) {
-  const filters = {
-    empleadoId: auth.session.user.id,
-    desde: desdeInput.value,
-    hasta: hastaInput.value,
-  };
-  const seq = ++requestSeq; // invalida respuestas en vuelo aunque el rango sea inválido
+// Los filtros solo se aplican al pulsar «Buscar»; tabla y paginador usan appliedFilters.
+document.getElementById("filters-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const filters = readFilters();
   const rangeError = validateDateRange(filters);
   if (rangeError) {
     showToast(rangeError, "error");
     return;
   }
+  appliedFilters = filters;
+  loadMyOrders(1);
+});
+document.getElementById("filter-clear").addEventListener("click", () => {
+  desdeInput.value = "";
+  hastaInput.value = "";
+  appliedFilters = readFilters();
+  loadMyOrders(1);
+});
 
+function readFilters() {
+  return { empleadoId: auth.session.user.id, desde: desdeInput.value, hasta: hastaInput.value };
+}
+
+async function loadMyOrders(page = currentPage) {
+  const seq = ++requestSeq;
   const result = await fetchOrdersPage(supabase, {
     select: "*, obras(nombre)",
-    filters,
+    filters: appliedFilters,
     page: pageInfo(page, totalOrders).page,
   });
   if (seq !== requestSeq) return;
@@ -67,7 +74,7 @@ async function loadMyOrders(page = currentPage) {
   renderPager(pager, info, (target) => loadMyOrders(target));
 
   if (result.data.length === 0) {
-    const filtered = desdeInput.value || hastaInput.value;
+    const filtered = appliedFilters.desde || appliedFilters.hasta;
     tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">${filtered ? "No hay órdenes en ese período." : "Aún no has registrado ninguna orden."}</td></tr>`;
     return;
   }

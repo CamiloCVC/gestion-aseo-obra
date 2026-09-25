@@ -14,7 +14,6 @@ import { pageInfo, formatCounter, renderPager } from "./pagination.js";
 import "./tooltip.js";
 
 const ORDERS_SELECT = "*, profiles(nombre, email), obras(nombre)";
-const SEARCH_DEBOUNCE_MS = 300;
 
 const tableBody = document.getElementById("orders-body");
 const modal = document.getElementById("detail-modal");
@@ -33,6 +32,7 @@ const hastaInput = document.getElementById("filter-hasta");
 let currentPage = 1;
 let totalOrders = 0;
 let requestSeq = 0;
+let appliedFilters = {};
 
 const auth = await requireRole(["admin", "superadmin"]);
 if (auth) {
@@ -42,6 +42,7 @@ if (auth) {
     activeHref: "admin.html",
   });
   await loadFilterOptions();
+  appliedFilters = readFilters();
   await loadOrders(1);
 }
 
@@ -50,25 +51,30 @@ document.getElementById("refresh-btn")?.addEventListener("click", async () => {
   await loadOrders(currentPage);
 });
 
-let searchTimer;
-searchInput.addEventListener("input", () => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => loadOrders(1), SEARCH_DEBOUNCE_MS);
+// Los filtros solo se aplican al pulsar «Buscar» (o Enter); tabla, paginador y export usan appliedFilters.
+document.getElementById("filters-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const filters = readFilters();
+  const rangeError = validateDateRange(filters);
+  if (rangeError) {
+    showToast(rangeError, "error");
+    return;
+  }
+  appliedFilters = filters;
+  loadOrders(1);
 });
-[empleadoSelect, obraSelect, desdeInput, hastaInput].forEach((el) =>
-  el.addEventListener("change", () => loadOrders(1))
-);
 document.getElementById("filter-clear").addEventListener("click", () => {
   searchInput.value = "";
   empleadoSelect.value = "";
   obraSelect.value = "";
   desdeInput.value = "";
   hastaInput.value = "";
+  appliedFilters = readFilters();
   loadOrders(1);
 });
 exportBtn.addEventListener("click", exportOrders);
 
-function currentFilters() {
+function readFilters() {
   return {
     search: searchInput.value,
     empleadoId: empleadoSelect.value,
@@ -97,17 +103,10 @@ function fillSelect(select, allLabel, options) {
 }
 
 async function loadOrders(page = currentPage) {
-  const filters = currentFilters();
-  const seq = ++requestSeq; // invalida respuestas en vuelo aunque el rango sea inválido
-  const rangeError = validateDateRange(filters);
-  if (rangeError) {
-    showToast(rangeError, "error");
-    return;
-  }
-
+  const seq = ++requestSeq;
   const result = await fetchOrdersPage(supabase, {
     select: ORDERS_SELECT,
-    filters,
+    filters: appliedFilters,
     page: pageInfo(page, totalOrders).page,
   });
   if (seq !== requestSeq) return; // llegó una respuesta más nueva
@@ -159,17 +158,10 @@ function renderOrders(data) {
 }
 
 async function exportOrders() {
-  const filters = currentFilters();
-  const rangeError = validateDateRange(filters);
-  if (rangeError) {
-    showToast(rangeError, "error");
-    return;
-  }
-
   exportBtn.disabled = true;
   exportBtn.textContent = "Exportando…";
   try {
-    const { rows, total } = await collectOrders(supabase, filters);
+    const { rows, total } = await collectOrders(supabase, appliedFilters);
     if (rows.length === 0) {
       showToast("No hay órdenes para exportar.", "info");
       return;
@@ -180,7 +172,7 @@ async function exportOrders() {
     }
 
     const blob = new Blob([toCsv(ORDER_COLUMNS, rows)], { type: "text/csv;charset=utf-8" });
-    downloadBlob(blob, csvFilename(filters));
+    downloadBlob(blob, csvFilename(appliedFilters));
     showToast(`${rows.length} órdenes exportadas.`, "success");
   } catch (err) {
     showToast(`Error al exportar: ${err.message}`, "error");
