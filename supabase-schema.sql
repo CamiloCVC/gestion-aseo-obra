@@ -19,7 +19,7 @@ alter table profiles enable row level security;
 create policy "usuarios ven su propio perfil"
   on profiles for select
   to authenticated
-  using (id = auth.uid());
+  using (id = (select auth.uid()));
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -72,13 +72,18 @@ grant execute on function public.is_active_user() to authenticated;
 create policy "superadmin ve todos los perfiles"
   on profiles for select
   to authenticated
-  using (is_superadmin());
+  using ((select is_superadmin()));
+
+create policy "staff ve todos los perfiles"
+  on profiles for select
+  to authenticated
+  using ((select is_staff()));
 
 create policy "superadmin edita cualquier perfil"
   on profiles for update
   to authenticated
-  using (is_superadmin())
-  with check (is_superadmin());
+  using ((select is_superadmin()))
+  with check ((select is_superadmin()));
 
 -- Obras activas/inactivas, seleccionables al crear una orden
 create table if not exists obras (
@@ -93,23 +98,23 @@ alter table obras enable row level security;
 create policy "usuarios activos ven obras"
   on obras for select
   to authenticated
-  using (is_active_user());
+  using ((select is_active_user()));
 
 create policy "staff crea obras"
   on obras for insert
   to authenticated
-  with check (is_staff());
+  with check ((select is_staff()));
 
 create policy "staff actualiza obras"
   on obras for update
   to authenticated
-  using (is_staff())
-  with check (is_staff());
+  using ((select is_staff()))
+  with check ((select is_staff()));
 
 create policy "staff elimina obras"
   on obras for delete
   to authenticated
-  using (is_staff());
+  using ((select is_staff()));
 
 create table if not exists ordenes (
   id uuid primary key default gen_random_uuid(),
@@ -129,32 +134,32 @@ alter table ordenes enable row level security;
 create policy "empleados crean sus propias ordenes"
   on ordenes for insert
   to authenticated
-  with check (creado_por_id = auth.uid() and is_active_user());
+  with check (creado_por_id = (select auth.uid()) and (select is_active_user()));
 
 create policy "empleados ven las suyas, staff ve todas"
   on ordenes for select
   to authenticated
-  using (creado_por_id = auth.uid() or is_staff());
+  using (creado_por_id = (select auth.uid()) or (select is_staff()));
 
 create policy "staff elimina ordenes"
   on ordenes for delete
   to authenticated
-  using (is_staff());
+  using ((select is_staff()));
 
 create policy "activos suben evidencia"
   on storage.objects for insert
   to authenticated
-  with check (bucket_id = 'evidencias' and is_active_user());
+  with check (bucket_id = 'evidencias' and (select is_active_user()));
 
 create policy "solo staff ve evidencia"
   on storage.objects for select
   to authenticated
-  using (bucket_id = 'evidencias' and is_staff());
+  using (bucket_id = 'evidencias' and (select is_staff()));
 
 create policy "staff elimina evidencia"
   on storage.objects for delete
   to authenticated
-  using (bucket_id = 'evidencias' and is_staff());
+  using (bucket_id = 'evidencias' and (select is_staff()));
 
 -- Primer superadmin: crea el usuario en Authentication → Add user,
 -- luego promuévelo manualmente:

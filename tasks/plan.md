@@ -59,3 +59,53 @@ testing (no features nuevas — esas se planifican aparte cuando aplique).
 
 Cada fase termina cuando su comando (`npm run test:unit`, etc.) corre en
 verde localmente antes de pasar a la siguiente.
+
+---
+
+# Plan: Filtro por período, paginación y exportación CSV de órdenes
+
+Spec: `docs/spec-ordenes-filtros-export.md` (aprobado). Independiente del
+plan de testing retrofit de arriba; los unit tests nuevos usan el mismo
+Vitest ya instalado.
+
+## Grafo de dependencias
+
+```
+pagination.js ─┐
+orders-query.js ┼─► admin (tabla+filtros+contador) ─► exportar CSV
+csv.js ────────┤                                       ▲
+validation.js ─┘─► mis-ordenes (período+paginación)    │
+policy profiles ─► dropdown Empleado / "Creado por" ───┘ (para admin no-superadmin)
+CSS toolbar/pager ─► admin y mis-ordenes
+```
+
+## Fases (cortes verticales, cada una deja la app funcionando)
+
+1. **Núcleo puro, TDD** — `pagination.js`, `orders-query.js`, `csv.js`,
+   `dateRangeSchema` en `validation.js`. Sin tocar HTML. Riesgo bajo; es donde
+   viven los edge cases (fronteras de día, escape de búsqueda, CSV injection).
+2. **Policy de perfiles** — agregar a `supabase-schema.sql` y aplicar al
+   proyecto real. Independiente, se puede hacer en paralelo con la 1.
+   Riesgo: cambio de RLS → pedir autorización explícita al aplicarla.
+3. **Admin: filtros servidor + paginación + contador** — `admin.html/js`,
+   CSS. Reemplaza el filtrado en memoria. Dropdown Empleado pasa a leer
+   `profiles`. Riesgo principal: carreras entre consultas (debounce +
+   ignorar respuestas viejas) y página fuera de rango tras borrar (PGRST103 →
+   contar con `head` y recalcular la última página).
+4. **Mis órdenes: período + paginación + contador** — reusa los módulos de 1
+   y el CSS de 3. Cambio pequeño y aislado.
+5. **Exportar CSV (solo admin)** — lotes de 1000 con orden estable, mismo
+   `applyOrderFilters`. Riesgo: memoria con decenas de miles de filas
+   (aceptado; techo ~cientos de miles) y consistencia si cambian los datos
+   durante la descarga (aceptado).
+6. **Verificación final** — 4 breakpoints, cruce contador == filas del CSV
+   con >1000 filas de prueba, CSV en Excel, sesión empleado.
+
+## Orden
+
+1 ∥ 2 → 3 → 4 → 5 → 6. La 5 depende de 3 (UI de filtros) y de 1 (`csv.js`).
+
+## Checkpoints
+
+Tras 1: `npm test` verde. Tras 3: revisar en navegador la tabla admin antes de
+seguir. Tras 5: contador vs CSV. Al final: `npm test` + revisión de código.
