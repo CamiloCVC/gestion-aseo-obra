@@ -21,6 +21,22 @@
       <a class="button-link" href="nueva-orden.html">+ Nueva orden</a>
     </div>
 
+    <form class="inline-form" id="filters-form">
+      <div>
+        <label for="filter-desde">Desde</label>
+        <input type="date" id="filter-desde" />
+      </div>
+      <div>
+        <label for="filter-hasta">Hasta</label>
+        <input type="date" id="filter-hasta" />
+      </div>
+      <button type="button" class="secondary" id="filter-clear">Limpiar filtros</button>
+    </form>
+
+    <div class="table-toolbar">
+      <p class="table-counter" id="orders-counter" aria-live="polite"></p>
+    </div>
+
     <div class="table-wrap">
       <table>
         <thead>
@@ -39,6 +55,8 @@
         </tbody>
       </table>
     </div>
+
+    <nav class="pager" id="pager" aria-label="Paginación de órdenes" hidden></nav>
   </main>
 
   <script type="module" src="js/mis-ordenes.js"></script>

@@ -8,5 +8,14 @@ export async function downloadFile(url, filename) {
   anchor.download = filename;
   anchor.click();
 
-  URL.revokeObjectURL(objectUrl);
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+}
+
+export function downloadBlob(blob, filename) {
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = filename;
+  anchor.click();
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 }

@@ -626,6 +626,39 @@ button.danger:hover {
   background: var(--color-surface-raised);
 }
 
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.table-counter {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.pager {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.pager[hidden] {
+  display: none;
+}
+
+.pager-status {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

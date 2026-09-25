@@ -3,9 +3,20 @@ import { requireActiveProfile } from "./auth.js";
 import { renderHeader } from "./layout.js";
 import { escapeHtml } from "./escape-html.js";
 import { renderIcons } from "./icons.js";
+import { showToast } from "./toast.js";
+import { fetchOrdersPage, validateDateRange } from "./orders-query.js";
+import { pageInfo, formatCounter, renderPager } from "./pagination.js";
 import "./tooltip.js";
 
 const tableBody = document.getElementById("orders-body");
+const counter = document.getElementById("orders-counter");
+const pager = document.getElementById("pager");
+const desdeInput = document.getElementById("filter-desde");
+const hastaInput = document.getElementById("filter-hasta");
+
+let currentPage = 1;
+let totalOrders = 0;
+let requestSeq = 0;
 
 const auth = await requireActiveProfile();
 if (auth) {
@@ -14,27 +25,54 @@ if (auth) {
     profile: auth.profile,
     activeHref: "mis-ordenes.html",
   });
-  await loadMyOrders(auth.session.user.id);
+  await loadMyOrders(1);
 }
 
-async function loadMyOrders(userId) {
-  const { data, error } = await supabase
-    .from("ordenes")
-    .select("*, obras(nombre)")
-    .eq("creado_por_id", userId)
-    .order("created_at", { ascending: false });
+[desdeInput, hastaInput].forEach((el) => el.addEventListener("change", () => loadMyOrders(1)));
+document.getElementById("filter-clear").addEventListener("click", () => {
+  desdeInput.value = "";
+  hastaInput.value = "";
+  loadMyOrders(1);
+});
 
-  if (error) {
-    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Error cargando órdenes: ${escapeHtml(error.message)}</td></tr>`;
+async function loadMyOrders(page = currentPage) {
+  const filters = {
+    empleadoId: auth.session.user.id,
+    desde: desdeInput.value,
+    hasta: hastaInput.value,
+  };
+  const seq = ++requestSeq; // invalida respuestas en vuelo aunque el rango sea inválido
+  const rangeError = validateDateRange(filters);
+  if (rangeError) {
+    showToast(rangeError, "error");
     return;
   }
 
-  if (data.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Aún no has registrado ninguna orden.</td></tr>`;
+  const result = await fetchOrdersPage(supabase, {
+    select: "*, obras(nombre)",
+    filters,
+    page: pageInfo(page, totalOrders).page,
+  });
+  if (seq !== requestSeq) return;
+
+  if (result.error) {
+    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">Error cargando órdenes: ${escapeHtml(result.error.message)}</td></tr>`;
     return;
   }
 
-  tableBody.innerHTML = data
+  totalOrders = result.count ?? 0;
+  const info = pageInfo(result.page, totalOrders);
+  currentPage = info.page;
+  counter.textContent = formatCounter(info, totalOrders);
+  renderPager(pager, info, (target) => loadMyOrders(target));
+
+  if (result.data.length === 0) {
+    const filtered = desdeInput.value || hastaInput.value;
+    tableBody.innerHTML = `<tr><td colspan="7" class="empty-state">${filtered ? "No hay órdenes en ese período." : "Aún no has registrado ninguna orden."}</td></tr>`;
+    return;
+  }
+
+  tableBody.innerHTML = result.data
     .map((order) => {
       const isPending = (order.fotos_despues ?? []).length === 0;
       return `

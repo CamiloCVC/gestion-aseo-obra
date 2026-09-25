@@ -6,19 +6,33 @@ import { renderCarousel } from "./carousel.js";
 import { loadObras } from "./obras.js";
 import { showToast } from "./toast.js";
 import { renderIcons } from "./icons.js";
+import { downloadBlob } from "./download-file.js";
+import { fetchOrdersPage, validateDateRange } from "./orders-query.js";
+import { collectOrders, ORDER_COLUMNS } from "./orders-export.js";
+import { toCsv, csvFilename } from "./csv.js";
+import { pageInfo, formatCounter, renderPager } from "./pagination.js";
 import "./tooltip.js";
+
+const ORDERS_SELECT = "*, profiles(nombre, email), obras(nombre)";
+const SEARCH_DEBOUNCE_MS = 300;
 
 const tableBody = document.getElementById("orders-body");
 const modal = document.getElementById("detail-modal");
 const modalBody = document.getElementById("modal-body");
 const modalClose = document.getElementById("modal-close");
+const counter = document.getElementById("orders-counter");
+const pager = document.getElementById("pager");
+const exportBtn = document.getElementById("export-btn");
 
 const searchInput = document.getElementById("filter-search");
 const empleadoSelect = document.getElementById("filter-empleado");
 const obraSelect = document.getElementById("filter-obra");
-const fechaInput = document.getElementById("filter-fecha");
+const desdeInput = document.getElementById("filter-desde");
+const hastaInput = document.getElementById("filter-hasta");
 
-let allOrders = [];
+let currentPage = 1;
+let totalOrders = 0;
+let requestSeq = 0;
 
 const auth = await requireRole(["admin", "superadmin"]);
 if (auth) {
@@ -27,75 +41,88 @@ if (auth) {
     profile: auth.profile,
     activeHref: "admin.html",
   });
-  await loadOrders();
+  await loadFilterOptions();
+  await loadOrders(1);
 }
 
-document.getElementById("refresh-btn")?.addEventListener("click", loadOrders);
-[searchInput, empleadoSelect, obraSelect, fechaInput].forEach((el) =>
-  el.addEventListener("input", renderFilteredOrders)
+document.getElementById("refresh-btn")?.addEventListener("click", async () => {
+  await loadFilterOptions();
+  await loadOrders(currentPage);
+});
+
+let searchTimer;
+searchInput.addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => loadOrders(1), SEARCH_DEBOUNCE_MS);
+});
+[empleadoSelect, obraSelect, desdeInput, hastaInput].forEach((el) =>
+  el.addEventListener("change", () => loadOrders(1))
 );
 document.getElementById("filter-clear").addEventListener("click", () => {
   searchInput.value = "";
   empleadoSelect.value = "";
   obraSelect.value = "";
-  fechaInput.value = "";
-  renderFilteredOrders();
+  desdeInput.value = "";
+  hastaInput.value = "";
+  loadOrders(1);
 });
+exportBtn.addEventListener("click", exportOrders);
 
-async function loadOrders() {
-  const [{ data, error }, obras] = await Promise.all([
-    supabase
-      .from("ordenes")
-      .select("*, profiles(nombre, email), obras(nombre)")
-      .order("created_at", { ascending: false }),
+function currentFilters() {
+  return {
+    search: searchInput.value,
+    empleadoId: empleadoSelect.value,
+    obraId: obraSelect.value,
+    desde: desdeInput.value,
+    hasta: hastaInput.value,
+  };
+}
+
+async function loadFilterOptions() {
+  const [{ data: perfiles }, obras] = await Promise.all([
+    supabase.from("profiles").select("id, nombre").order("nombre", { ascending: true }),
     loadObras(),
   ]);
 
-  if (error) {
-    tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">Error cargando órdenes: ${escapeHtml(error.message)}</td></tr>`;
+  fillSelect(empleadoSelect, "Todos", (perfiles ?? []).map((p) => ({ value: p.id, label: p.nombre })));
+  fillSelect(obraSelect, "Todas", obras.map((o) => ({ value: o.id, label: o.nombre })));
+}
+
+function fillSelect(select, allLabel, options) {
+  const previous = select.value;
+  select.innerHTML =
+    `<option value="">${allLabel}</option>` +
+    options.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join("");
+  select.value = previous;
+}
+
+async function loadOrders(page = currentPage) {
+  const filters = currentFilters();
+  const seq = ++requestSeq; // invalida respuestas en vuelo aunque el rango sea inválido
+  const rangeError = validateDateRange(filters);
+  if (rangeError) {
+    showToast(rangeError, "error");
     return;
   }
 
-  allOrders = data;
-  populateFilterOptions(data, obras);
-  renderFilteredOrders();
-}
-
-function populateFilterOptions(orders, obras) {
-  const empleados = new Map();
-  orders.forEach((order) => {
-    if (order.profiles) empleados.set(order.creado_por_id, order.profiles.nombre);
+  const result = await fetchOrdersPage(supabase, {
+    select: ORDERS_SELECT,
+    filters,
+    page: pageInfo(page, totalOrders).page,
   });
+  if (seq !== requestSeq) return; // llegó una respuesta más nueva
 
-  empleadoSelect.innerHTML =
-    `<option value="">Todos</option>` +
-    [...empleados.entries()]
-      .map(([id, nombre]) => `<option value="${escapeHtml(id)}">${escapeHtml(nombre)}</option>`)
-      .join("");
+  if (result.error) {
+    tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">Error cargando órdenes: ${escapeHtml(result.error.message)}</td></tr>`;
+    return;
+  }
 
-  obraSelect.innerHTML =
-    `<option value="">Todas</option>` +
-    obras.map((obra) => `<option value="${escapeHtml(obra.id)}">${escapeHtml(obra.nombre)}</option>`).join("");
-}
-
-function renderFilteredOrders() {
-  const search = searchInput.value.trim().toLowerCase();
-  const empleadoId = empleadoSelect.value;
-  const obraId = obraSelect.value;
-  const fecha = fechaInput.value;
-
-  const filtered = allOrders.filter((order) => {
-    if (empleadoId && order.creado_por_id !== empleadoId) return false;
-    if (obraId && order.obra_id !== obraId) return false;
-    if (fecha && !order.fecha_hora.startsWith(fecha)) return false;
-    if (search) {
-      const haystack = `${order.piso} ${order.contratista} ${order.comentarios ?? ""}`.toLowerCase();
-      if (!haystack.includes(search)) return false;
-    }
-    return true;
-  });
-
-  renderOrders(filtered);
+  totalOrders = result.count ?? 0;
+  const info = pageInfo(result.page, totalOrders);
+  currentPage = info.page;
+  counter.textContent = formatCounter(info, totalOrders);
+  renderPager(pager, info, (target) => loadOrders(target));
+  renderOrders(result.data);
 }
 
 function renderOrders(data) {
@@ -131,6 +158,38 @@ function renderOrders(data) {
   renderIcons();
 }
 
+async function exportOrders() {
+  const filters = currentFilters();
+  const rangeError = validateDateRange(filters);
+  if (rangeError) {
+    showToast(rangeError, "error");
+    return;
+  }
+
+  exportBtn.disabled = true;
+  exportBtn.textContent = "Exportando…";
+  try {
+    const { rows, total } = await collectOrders(supabase, filters);
+    if (rows.length === 0) {
+      showToast("No hay órdenes para exportar.", "info");
+      return;
+    }
+    if (rows.length !== total) {
+      showToast("El número de órdenes descargadas no coincide con el total (los datos cambiaron durante la exportación). Vuelve a exportar.", "error");
+      return;
+    }
+
+    const blob = new Blob([toCsv(ORDER_COLUMNS, rows)], { type: "text/csv;charset=utf-8" });
+    downloadBlob(blob, csvFilename(filters));
+    showToast(`${rows.length} órdenes exportadas.`, "success");
+  } catch (err) {
+    showToast(`Error al exportar: ${err.message}`, "error");
+  } finally {
+    exportBtn.disabled = false;
+    exportBtn.textContent = "Exportar CSV";
+  }
+}
+
 async function deleteOrder(order) {
   if (!confirm(`¿Eliminar la orden de "${order.piso}" (${order.fecha_hora})? Esta acción no se puede deshacer.`)) {
     return;
@@ -148,7 +207,8 @@ async function deleteOrder(order) {
   }
 
   showToast("Orden eliminada.", "success");
-  await loadOrders();
+  totalOrders = Math.max(0, totalOrders - 1);
+  await loadOrders(currentPage);
 }
 
 async function signedUrls(paths) {

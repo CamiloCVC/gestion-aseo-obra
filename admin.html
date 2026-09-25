@@ -38,11 +38,20 @@
         <select id="filter-obra"><option value="">Todas</option></select>
       </div>
       <div>
-        <label for="filter-fecha">Fecha</label>
-        <input type="date" id="filter-fecha" />
+        <label for="filter-desde">Desde</label>
+        <input type="date" id="filter-desde" />
+      </div>
+      <div>
+        <label for="filter-hasta">Hasta</label>
+        <input type="date" id="filter-hasta" />
       </div>
       <button type="button" class="secondary" id="filter-clear">Limpiar filtros</button>
     </form>
+
+    <div class="table-toolbar">
+      <p class="table-counter" id="orders-counter" aria-live="polite"></p>
+      <button type="button" class="secondary" id="export-btn">Exportar CSV</button>
+    </div>
 
     <div class="table-wrap">
       <table>
@@ -63,6 +72,8 @@
         </tbody>
       </table>
     </div>
+
+    <nav class="pager" id="pager" aria-label="Paginación de órdenes" hidden></nav>
   </main>
 
   <dialog id="detail-modal">
