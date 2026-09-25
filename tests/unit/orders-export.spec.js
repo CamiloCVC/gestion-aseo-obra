@@ -38,7 +38,7 @@ describe("fetchAllOrders", () => {
 describe("ORDER_COLUMNS", () => {
   const order = {
     id: "abc",
-    fecha_hora: new Date(2026, 2, 31, 14, 5).toISOString(),
+    fecha_hora: "2026-03-31T19:05:00+00:00",
     obras: { nombre: "Torre Norte" },
     piso: "Piso 3",
     contratista: "ACME",

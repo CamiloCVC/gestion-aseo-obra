@@ -57,7 +57,7 @@ describe("toCsv", () => {
 });
 
 describe("csvFilename", () => {
-  const today = new Date(2026, 8, 24);
+  const today = new Date("2026-09-24T15:00:00Z");
 
   it("uses today when there is no date filter", () => {
     expect(csvFilename({}, today)).toBe("ordenes_2026-09-24.csv");

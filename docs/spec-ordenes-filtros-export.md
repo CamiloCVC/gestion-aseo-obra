@@ -26,8 +26,13 @@ Míos (corrígeme si alguno está mal):
    función de filtros.
 8. El filtro "Fecha" actual (un solo día) **se reemplaza** por "Desde / Hasta".
    Ambos inician vacíos; se puede llenar solo uno (rango abierto).
-9. Fechas interpretadas en la zona horaria del navegador. "Hasta" es
-   inclusivo (todo el día seleccionado).
+9. ~~Fechas en la zona horaria del navegador~~ → **Todo en hora de Colombia
+   (America/Bogota, UTC-5)**: el formulario de nueva orden envía `fecha_hora`
+   con offset `-05:00`; tabla, detalle, CSV y límites de día (Desde/Hasta) se
+   muestran/calculan en hora de Colombia, formato 24 h `YYYY-MM-DD HH:mm`.
+   "Hasta" es inclusivo (todo el día seleccionado). Las órdenes anteriores se
+   guardaron con la hora digitada como UTC y se corrigen con un UPDATE de +5 h
+   (`supabase/migrations/`).
 10. El CSV usa **`;` como separador + BOM UTF-8**, porque Excel en configuración
     regional es-CO/es-ES abre los `,` todo en una sola columna. Sheets/LibreOffice
     también lo leen bien.

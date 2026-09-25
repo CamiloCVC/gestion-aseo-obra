@@ -1,21 +1,7 @@
 import { PAGE_SIZE, pageInfo } from "./pagination.js";
+import { dayStartIso, nextDayStartIso } from "./format-date.js";
 
 const PAGE_OUT_OF_RANGE = "PGRST103";
-
-function parseDay(day) {
-  const [year, month, date] = day.split("-").map(Number);
-  return { year, month: month - 1, date };
-}
-
-export function localDayStartIso(day) {
-  const { year, month, date } = parseDay(day);
-  return new Date(year, month, date).toISOString();
-}
-
-export function nextDayStartIso(day) {
-  const { year, month, date } = parseDay(day);
-  return new Date(year, month, date + 1).toISOString();
-}
 
 // Escapa comodines de LIKE y luego los caracteres del valor entrecomillado de PostgREST.
 function quoteIlike(text) {
@@ -39,7 +25,7 @@ export function applyOrderFilters(query, { search, empleadoId, obraId, desde, ha
   let q = query;
   if (empleadoId) q = q.eq("creado_por_id", empleadoId);
   if (obraId) q = q.eq("obra_id", obraId);
-  if (desde) q = q.gte("fecha_hora", localDayStartIso(desde));
+  if (desde) q = q.gte("fecha_hora", dayStartIso(desde));
   if (hasta) q = q.lt("fecha_hora", nextDayStartIso(hasta));
   const term = search?.trim();
   if (term) q = q.or(searchClause(term));

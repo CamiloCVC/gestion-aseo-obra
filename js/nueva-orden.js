@@ -1,3 +1,4 @@
+import { colombiaNowInputValue, toColombiaIso } from "./format-date.js";
 import { supabase } from "./supabase-client.js";
 import { requireActiveProfile, landingPageFor } from "./auth.js";
 import { renderHeader } from "./layout.js";
@@ -38,9 +39,7 @@ async function loadObraOptions() {
 }
 
 function setDefaultFechaHora() {
-  fechaHoraInput.value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16);
+  fechaHoraInput.value = colombiaNowInputValue();
 }
 
 function setupStage(stage) {
@@ -131,7 +130,7 @@ form.addEventListener("submit", async (event) => {
       obra_id: result.data.obra_id,
       piso: result.data.piso,
       contratista: result.data.contratista,
-      fecha_hora: result.data.fecha_hora,
+      fecha_hora: toColombiaIso(result.data.fecha_hora),
       comentarios: document.getElementById("comentarios").value.trim(),
       fotos_antes: fotosAntesPaths,
       fotos_despues: fotosDespuesPaths,

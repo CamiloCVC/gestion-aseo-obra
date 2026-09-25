@@ -1,3 +1,4 @@
+import { formatDateTime } from "./format-date.js";
 import { supabase } from "./supabase-client.js";
 import { requireRole } from "./auth.js";
 import { renderHeader } from "./layout.js";
@@ -137,7 +138,7 @@ function renderOrders(data) {
 
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${escapeHtml(order.fecha_hora)}</td>
+      <td>${escapeHtml(formatDateTime(order.fecha_hora))}</td>
       <td>${escapeHtml(order.obras?.nombre) || "-"}</td>
       <td>${escapeHtml(order.piso)}</td>
       <td>${escapeHtml(order.contratista)}</td>
@@ -183,7 +184,7 @@ async function exportOrders() {
 }
 
 async function deleteOrder(order) {
-  if (!confirm(`¿Eliminar la orden de "${order.piso}" (${order.fecha_hora})? Esta acción no se puede deshacer.`)) {
+  if (!confirm(`¿Eliminar la orden de "${order.piso}" (${formatDateTime(order.fecha_hora)})? Esta acción no se puede deshacer.`)) {
     return;
   }
 
@@ -226,7 +227,7 @@ async function openDetail(order) {
     <p><strong>Obra:</strong> ${escapeHtml(order.obras?.nombre) || "-"}</p>
     <p><strong>Piso/Lugar:</strong> ${escapeHtml(order.piso)}</p>
     <p><strong>Contratista:</strong> ${escapeHtml(order.contratista)}</p>
-    <p><strong>Fecha y hora:</strong> ${escapeHtml(order.fecha_hora)}</p>
+    <p><strong>Fecha y hora:</strong> ${escapeHtml(formatDateTime(order.fecha_hora))}</p>
     <p><strong>Creado por:</strong> ${escapeHtml(order.profiles?.nombre)} (${escapeHtml(order.profiles?.email)})</p>
     <p><strong>Comentarios:</strong> ${escapeHtml(order.comentarios) || "-"}</p>
     <div class="gallery"><h4>Antes</h4><div id="carousel-antes"></div></div>

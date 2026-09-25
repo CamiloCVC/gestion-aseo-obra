@@ -1,3 +1,4 @@
+import { formatDateTime } from "./format-date.js";
 import { supabase } from "./supabase-client.js";
 import { requireActiveProfile } from "./auth.js";
 import { renderHeader } from "./layout.js";
@@ -84,7 +85,7 @@ async function loadMyOrders(page = currentPage) {
       const isPending = (order.fotos_despues ?? []).length === 0;
       return `
         <tr>
-          <td>${escapeHtml(order.fecha_hora)}</td>
+          <td>${escapeHtml(formatDateTime(order.fecha_hora))}</td>
           <td>${escapeHtml(order.obras?.nombre) || "-"}</td>
           <td>${escapeHtml(order.piso)}</td>
           <td>${escapeHtml(order.contratista)}</td>

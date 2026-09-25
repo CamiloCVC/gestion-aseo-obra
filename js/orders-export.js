@@ -1,18 +1,12 @@
 import { applyOrderFilters } from "./orders-query.js";
+import { formatDateTime } from "./format-date.js";
 
 const BATCH_SIZE = 1000; // max_rows por defecto de Supabase
-
-const pad = (n) => String(n).padStart(2, "0");
-
-function formatLocal(iso) {
-  const date = new Date(iso);
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
 
 const isPending = (order) => (order.fotos_despues ?? []).length === 0;
 
 export const ORDER_COLUMNS = [
-  { header: "Fecha/hora", value: (order) => formatLocal(order.fecha_hora) },
+  { header: "Fecha/hora", value: (order) => formatDateTime(order.fecha_hora) },
   { header: "Obra", value: (order) => order.obras?.nombre ?? "" },
   { header: "Piso/Lugar", value: (order) => order.piso },
   { header: "Contratista", value: (order) => order.contratista },

@@ -1,9 +1,8 @@
 import { describe, it, expect } from "vitest";
+import { dayStartIso, nextDayStartIso } from "../../js/format-date.js";
 import {
   applyOrderFilters,
   fetchOrdersPage,
-  localDayStartIso,
-  nextDayStartIso,
   searchClause,
   validateDateRange,
 } from "../../js/orders-query.js";
@@ -18,20 +17,6 @@ function fakeBuilder(calls = []) {
   }
   return builder;
 }
-
-describe("day boundaries", () => {
-  it("starts the day at local midnight", () => {
-    expect(localDayStartIso("2026-03-31")).toBe(new Date(2026, 2, 31).toISOString());
-  });
-
-  it("ends an inclusive day at the next local midnight", () => {
-    expect(nextDayStartIso("2026-03-31")).toBe(new Date(2026, 3, 1).toISOString());
-  });
-
-  it("rolls over the end of the year", () => {
-    expect(nextDayStartIso("2026-12-31")).toBe(new Date(2027, 0, 1).toISOString());
-  });
-});
 
 describe("searchClause", () => {
   it("searches piso, contratista and comentarios case-insensitively", () => {
@@ -69,8 +54,8 @@ describe("applyOrderFilters", () => {
     expect(calls).toEqual([
       ["eq", "creado_por_id", "u1"],
       ["eq", "obra_id", "o1"],
-      ["gte", "fecha_hora", new Date(2026, 2, 1).toISOString()],
-      ["lt", "fecha_hora", new Date(2026, 3, 1).toISOString()],
+      ["gte", "fecha_hora", dayStartIso("2026-03-01")],
+      ["lt", "fecha_hora", nextDayStartIso("2026-03-31")],
       ["or", searchClause("torre")],
     ]);
   });
@@ -78,7 +63,7 @@ describe("applyOrderFilters", () => {
   it("supports an open-ended range with only hasta", () => {
     const calls = [];
     applyOrderFilters(fakeBuilder(calls), { hasta: "2026-03-31" });
-    expect(calls).toEqual([["lt", "fecha_hora", new Date(2026, 3, 1).toISOString()]]);
+    expect(calls).toEqual([["lt", "fecha_hora", nextDayStartIso("2026-03-31")]]);
   });
 
   it("ignores a whitespace-only search", () => {

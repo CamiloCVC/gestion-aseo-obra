@@ -1,3 +1,5 @@
+import { colombiaDay } from "./format-date.js";
+
 const BOM = "﻿";
 const SEPARATOR = ";";
 const EOL = "\r\n";
@@ -17,12 +19,7 @@ export function toCsv(columns, rows) {
   return BOM + [header, ...lines].join(EOL);
 }
 
-function localDay(date) {
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
 export function csvFilename({ desde, hasta }, today = new Date()) {
-  if (!desde && !hasta) return `ordenes_${localDay(today)}.csv`;
+  if (!desde && !hasta) return `ordenes_${colombiaDay(today)}.csv`;
   return `ordenes_${desde || "inicio"}_${hasta || "hoy"}.csv`;
 }

@@ -1,3 +1,4 @@
+import { formatDateTime } from "./format-date.js";
 import { supabase } from "./supabase-client.js";
 import { requireActiveProfile, landingPageFor } from "./auth.js";
 import { renderHeader } from "./layout.js";
@@ -42,7 +43,7 @@ async function loadOrder(id) {
     <p><strong>Obra:</strong> ${escapeHtml(order.obras?.nombre) || "-"}</p>
     <p><strong>Piso/Lugar:</strong> ${escapeHtml(order.piso)}</p>
     <p><strong>Contratista:</strong> ${escapeHtml(order.contratista)}</p>
-    <p><strong>Fecha y hora:</strong> ${escapeHtml(order.fecha_hora)}</p>
+    <p><strong>Fecha y hora:</strong> ${escapeHtml(formatDateTime(order.fecha_hora))}</p>
     <p><strong>Comentarios:</strong> ${escapeHtml(order.comentarios) || "-"}</p>
   `;
 
