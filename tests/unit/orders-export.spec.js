@@ -45,6 +45,7 @@ describe("ORDER_COLUMNS", () => {
     profiles: { nombre: "Ana", email: "ana@example.com" },
     fotos_antes: ["a", "b"],
     fotos_despues: [],
+    completada: false,
     comentarios: "=cmd",
   };
   const byHeader = Object.fromEntries(ORDER_COLUMNS.map((c) => [c.header, c.value(order)]));
@@ -59,10 +60,11 @@ describe("ORDER_COLUMNS", () => {
     expect(byHeader["Estado"]).toBe("Pendiente");
   });
 
-  it("marks an order with after photos as complete", () => {
+  it("marks a completed order as complete regardless of photo count", () => {
     const done = ORDER_COLUMNS.find((c) => c.header === "Estado").value({
       ...order,
       fotos_despues: ["x"],
+      completada: true,
     });
     expect(done).toBe("Completa");
   });

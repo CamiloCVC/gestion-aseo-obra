@@ -3,7 +3,7 @@ import { formatDateTime } from "./format-date.js";
 
 const BATCH_SIZE = 1000; // max_rows por defecto de Supabase
 
-const isPending = (order) => (order.fotos_despues ?? []).length === 0;
+const isPending = (order) => !order.completada;
 
 export const ORDER_COLUMNS = [
   { header: "Fecha/hora", value: (order) => formatDateTime(order.fecha_hora) },

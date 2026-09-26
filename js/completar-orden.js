@@ -7,14 +7,17 @@ import { wireDropZone } from "./drop-zone.js";
 import { compressImage } from "./image-compression.js";
 import { renderCarousel } from "./carousel.js";
 import { cleanupAvancesFor } from "./avances.js";
+import { infoDialog } from "./info-dialog.js";
 
 const summaryEl = document.getElementById("order-summary");
 const form = document.getElementById("complete-form");
 const submitBtn = document.getElementById("submit-btn");
 const statusEl = document.getElementById("status");
+const existingDespuesGallery = document.getElementById("existing-despues-gallery");
 
 const orderId = new URLSearchParams(window.location.search).get("id");
 let despuesFiles = [];
+let existingDespuesPaths = [];
 let currentProfile = null;
 
 const auth = await requireActiveProfile();
@@ -48,17 +51,13 @@ async function loadOrder(id) {
     <p><strong>Comentarios:</strong> ${escapeHtml(order.comentarios) || "-"}</p>
   `;
 
-  const { data: signed } = await supabase.storage
-    .from("evidencias")
-    .createSignedUrls(order.fotos_antes ?? [], 60 * 10);
-  await renderCarousel(
-    document.getElementById("carousel-antes"),
-    (signed ?? []).map((entry) => entry.signedUrl).filter(Boolean),
-    "antes"
+  const antesUrls = (order.fotos_antes ?? []).map(
+    (path) => supabase.storage.from("evidencias").getPublicUrl(path).data.publicUrl
   );
+  await renderCarousel(document.getElementById("carousel-antes"), antesUrls, "antes");
 
   const canComplete = order.creado_por_id === auth.session.user.id || isStaffRole(currentProfile?.role);
-  const isPending = (order.fotos_despues ?? []).length === 0;
+  const isPending = !order.completada;
 
   if (!canComplete || !isPending) {
     form.hidden = true;
@@ -66,6 +65,17 @@ async function loadOrder(id) {
       ? "Solo quien creó la orden, o un admin, puede completarla."
       : "Esta orden ya fue completada.";
     return;
+  }
+
+  // Orden reabierta: ya tenía fotos de después de un cierre anterior. Se
+  // muestran como referencia; el empleado agrega más solo si quiere.
+  existingDespuesPaths = order.fotos_despues ?? [];
+  if (existingDespuesPaths.length > 0) {
+    existingDespuesGallery.hidden = false;
+    const existingUrls = existingDespuesPaths.map(
+      (path) => supabase.storage.from("evidencias").getPublicUrl(path).data.publicUrl
+    );
+    await renderCarousel(document.getElementById("carousel-despues-existentes"), existingUrls, "despues");
   }
 
   wireDropZone(document.getElementById("dropzone-despues"), document.getElementById("fotos-despues"), (files) => {
@@ -106,7 +116,7 @@ function renderPreview() {
 async function onSubmit(event, id) {
   event.preventDefault();
 
-  if (despuesFiles.length === 0) {
+  if (existingDespuesPaths.length === 0 && despuesFiles.length === 0) {
     statusEl.textContent = "Adjunta al menos una foto de después.";
     return;
   }
@@ -115,16 +125,17 @@ async function onSubmit(event, id) {
   statusEl.textContent = "Comprimiendo y subiendo evidencia...";
 
   try {
-    const paths = [];
+    const newPaths = [];
     for (const file of despuesFiles) {
       const compressed = await compressImage(file);
       const path = `ordenes/${id}/despues/${Date.now()}-${compressed.name}`;
-      const { error } = await supabase.storage.from("evidencias").upload(path, compressed);
+      const { error } = await supabase.storage.from("evidencias").upload(path, compressed, { cacheControl: "31536000" });
       if (error) throw error;
-      paths.push(path);
+      newPaths.push(path);
     }
 
-    const { error } = await supabase.from("ordenes").update({ fotos_despues: paths }).eq("id", id);
+    const paths = [...existingDespuesPaths, ...newPaths];
+    const { error } = await supabase.from("ordenes").update({ fotos_despues: paths, completada: true }).eq("id", id);
     if (error) throw error;
 
     try {
@@ -137,8 +148,9 @@ async function onSubmit(event, id) {
 
     const backHref = landingPageFor(currentProfile?.role);
     const backLabel = backHref === "admin.html" ? "Ir a Órdenes" : "Ir a Mis órdenes";
-    statusEl.innerHTML = `Orden completada. <a href="${backHref}">${backLabel}</a>`;
-    form.hidden = true;
+    await infoDialog("Orden completada correctamente.", { okLabel: backLabel });
+    window.location.href = backHref;
+    return;
   } catch (err) {
     statusEl.textContent = `Error: ${err.message}`;
   } finally {

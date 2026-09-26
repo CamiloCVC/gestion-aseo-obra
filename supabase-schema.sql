@@ -2,8 +2,9 @@
 -- (vía Supabase MCP); este archivo sirve para recrear el backend desde cero
 -- si alguna vez se necesita un proyecto nuevo. Ejecutar en el SQL Editor.
 
--- 1. Crea primero el bucket de Storage "evidencias" como privado
---    (Storage → New bucket → Public bucket: OFF) antes de correr este script.
+-- 1. Crea primero el bucket de Storage "evidencias" como público
+--    (Storage → New bucket → Public bucket: ON) antes de correr este script.
+--    Las fotos de evidencia no son sensibles; se sirven con getPublicUrl.
 
 create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -125,6 +126,7 @@ create table if not exists ordenes (
   comentarios text,
   fotos_antes text[] not null default '{}',
   fotos_despues text[] not null default '{}',
+  completada boolean not null default false,
   creado_por_id uuid not null default auth.uid() references profiles(id),
   created_at timestamptz not null default now()
 );
@@ -147,23 +149,33 @@ create policy "staff elimina ordenes"
   using ((select is_staff()));
 
 -- El dueño de la orden o cualquier staff pueden completarla (subir
--- fotos_despues) mientras siga pendiente.
+-- fotos_despues) mientras siga pendiente (completada = false).
 create policy "dueño o staff completan una orden pendiente"
   on ordenes for update
   to authenticated
   using (
     (creado_por_id = (select auth.uid()) or (select is_staff()))
-    and cardinality(fotos_despues) = 0
+    and completada = false
   )
   with check (
     creado_por_id = (select auth.uid()) or (select is_staff())
   );
+
+-- Solo staff puede reabrir una orden ya completada (vuelve a Pendiente sin
+-- tocar fotos_despues; el empleado decide si agrega más fotos o no).
+create policy "staff reabre una orden completada"
+  on ordenes for update
+  to authenticated
+  using ((select is_staff()) and completada = true)
+  with check ((select is_staff()));
 
 create policy "activos suben evidencia"
   on storage.objects for insert
   to authenticated
   with check (bucket_id = 'evidencias' and (select is_active_user()));
 
+-- Bucket público: las lecturas vía getPublicUrl no pasan por esta policy
+-- (solo aplica si algo lee storage.objects con sesión autenticada, ej. list()).
 create policy "staff o el dueño de la orden ve su evidencia"
   on storage.objects for select
   to authenticated
@@ -227,7 +239,7 @@ create policy "dueño o staff agregan avances mientras esté pendiente"
       select 1 from ordenes o
       where o.id = orden_id
         and (o.creado_por_id = (select auth.uid()) or (select is_staff()))
-        and coalesce(array_length(o.fotos_despues, 1), 0) = 0
+        and o.completada = false
     )
   );
 

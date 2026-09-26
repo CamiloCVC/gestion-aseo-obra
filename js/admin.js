@@ -155,7 +155,7 @@ function renderOrders(data) {
 
   tableBody.innerHTML = "";
   for (const order of data) {
-    const isPending = (order.fotos_despues ?? []).length === 0;
+    const isPending = !order.completada;
 
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -171,6 +171,7 @@ function renderOrders(data) {
         ${isPending ? `<button class="icon-btn avances-btn" data-tooltip="Ver avances" aria-label="Ver avances"><i data-lucide="history"></i></button>` : ""}
         ${isPending ? `<button class="icon-btn avance-btn" data-tooltip="Agregar avance" aria-label="Agregar avance"><i data-lucide="camera"></i></button>` : ""}
         ${isPending ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}
+        ${!isPending ? `<button class="icon-btn reopen-btn" data-tooltip="Reabrir orden" aria-label="Reabrir orden"><i data-lucide="rotate-ccw"></i></button>` : ""}
         <button class="icon-btn icon-btn-danger delete-btn" data-tooltip="Eliminar orden" aria-label="Eliminar orden"><i data-lucide="trash-2"></i></button>
       </div></td>
     `;
@@ -180,6 +181,7 @@ function renderOrders(data) {
       avanceOrderId = order.id;
       avanceInput.click();
     });
+    row.querySelector(".reopen-btn")?.addEventListener("click", () => reopenOrder(order));
     row.querySelector(".delete-btn").addEventListener("click", () => deleteOrder(order));
     tableBody.appendChild(row);
   }
@@ -240,23 +242,36 @@ async function deleteOrder(order) {
   await loadOrders(currentPage);
 }
 
-async function signedUrls(paths) {
+async function reopenOrder(order) {
+  const ok = await confirmDialog(
+    `Estás a punto de reabrir la orden de "${order.piso}" (${formatDateTime(order.fecha_hora)}). El empleado podrá agregar más fotos de después. ¿Quieres continuar?`,
+    { confirmLabel: "Reabrir", danger: false }
+  );
+  if (!ok) return;
+
+  const { error } = await supabase.from("ordenes").update({ completada: false }).eq("id", order.id);
+  if (error) {
+    showToast(`Error al reabrir: ${error.message}`, "error");
+    return;
+  }
+
+  showToast("Orden reabierta.", "success");
+  await loadOrders(currentPage);
+}
+
+// Bucket público: getPublicUrl es local (sin round-trip a la API) y da una
+// URL estable que el navegador sí puede cachear entre visitas.
+function publicUrls(paths) {
   if (!paths || paths.length === 0) return [];
-  const { data, error } = await supabase.storage
-    .from("evidencias")
-    .createSignedUrls(paths, 60 * 10);
-  if (error) return [];
-  return data.map((entry) => entry.signedUrl).filter(Boolean);
+  return paths.map((path) => supabase.storage.from("evidencias").getPublicUrl(path).data.publicUrl);
 }
 
 async function openDetail(order) {
   modalBody.innerHTML = "<p>Cargando fotos...</p>";
   modal.showModal();
 
-  const [antesUrls, despuesUrls] = await Promise.all([
-    signedUrls(order.fotos_antes),
-    signedUrls(order.fotos_despues),
-  ]);
+  const antesUrls = publicUrls(order.fotos_antes);
+  const despuesUrls = publicUrls(order.fotos_despues);
 
   modalBody.innerHTML = `
     <h3>Orden ${escapeHtml(order.id)}</h3>
@@ -330,7 +345,7 @@ async function openAvances(order) {
 
   await Promise.all(
     groups.map(async (group, index) => {
-      const urls = await signedUrls(group.fotos);
+      const urls = publicUrls(group.fotos);
       await renderCarousel(document.getElementById(`avance-carousel-${index}`), urls, "avance");
     })
   );

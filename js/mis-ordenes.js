@@ -100,7 +100,7 @@ async function loadMyOrders(page = currentPage) {
 
   tableBody.innerHTML = "";
   for (const order of result.data) {
-    const isPending = (order.fotos_despues ?? []).length === 0;
+    const isPending = !order.completada;
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${escapeHtml(formatDateTime(order.fecha_hora))}</td>
