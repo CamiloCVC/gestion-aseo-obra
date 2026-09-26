@@ -865,9 +865,8 @@ dialog::backdrop {
 .lightbox-close,
 .lightbox-download {
   position: fixed;
-  top: var(--space-md);
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -876,25 +875,33 @@ dialog::backdrop {
   background: rgb(255 255 255 / 0.14);
   color: #fff;
   z-index: 20;
+  transition: background var(--duration-fast) var(--ease-out-expo);
 }
 
 .lightbox-close svg,
 .lightbox-download svg {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
 }
 
+/* Separadas espacialmente (cerrar arriba, descargar abajo) para que no se
+   confundan entre sí — no solo por el ícono, sino por dónde están. */
 .lightbox-close {
+  top: var(--space-md);
   right: var(--space-md);
 }
 
 .lightbox-download {
-  right: calc(var(--space-md) * 2 + 40px);
+  bottom: var(--space-md);
+  left: var(--space-md);
 }
 
-.lightbox-close:hover,
+.lightbox-close:hover {
+  background: var(--color-danger);
+}
+
 .lightbox-download:hover {
-  background: rgb(255 255 255 / 0.24);
+  background: rgb(255 255 255 / 0.28);
 }
 
 /* Toasts */
