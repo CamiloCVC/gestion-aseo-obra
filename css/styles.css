@@ -794,6 +794,23 @@ dialog::backdrop {
   background: rgb(20 20 18 / 0.4);
 }
 
+/* Confirm dialog: reemplazo estético de confirm() nativo */
+
+.confirm-dialog {
+  max-width: 420px;
+}
+
+.confirm-dialog-message {
+  margin-bottom: var(--space-md);
+  color: var(--color-text);
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+}
+
 /* Lightbox: agrandar foto del carrusel al hacer click */
 
 .lightbox {

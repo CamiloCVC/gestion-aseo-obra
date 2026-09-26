@@ -7,6 +7,7 @@ import { showToast } from "./toast.js";
 import { renderIcons } from "./icons.js";
 import "./tooltip.js";
 import { createObraSchema, editObraSchema, firstErrorMessage } from "./validation.js";
+import { confirmDialog } from "./confirm-dialog.js";
 
 const obrasBody = document.getElementById("obras-body");
 const createForm = document.getElementById("create-obra-form");
@@ -76,7 +77,8 @@ function openEditModal(id, nombre, activa) {
 }
 
 async function deleteObra(id, nombre) {
-  if (!confirm(`¿Eliminar la obra "${nombre}"? Esta acción no se puede deshacer.`)) return;
+  const ok = await confirmDialog(`¿Eliminar la obra "${nombre}"? Esta acción no se puede deshacer.`);
+  if (!ok) return;
 
   const { error } = await supabase.from("obras").delete().eq("id", id);
   if (error) {

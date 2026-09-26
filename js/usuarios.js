@@ -7,6 +7,7 @@ import { showToast } from "./toast.js";
 import { renderIcons } from "./icons.js";
 import "./tooltip.js";
 import { createUserSchema, editUserSchema, firstErrorMessage } from "./validation.js";
+import { confirmDialog } from "./confirm-dialog.js";
 
 const usersBody = document.getElementById("users-body");
 const createForm = document.getElementById("create-user-form");
@@ -110,7 +111,8 @@ editForm.addEventListener("submit", async (event) => {
 });
 
 async function deleteUser(id, email) {
-  if (!confirm(`¿Eliminar al usuario ${email}? Esta acción no se puede deshacer.`)) return;
+  const ok = await confirmDialog(`¿Eliminar al usuario ${email}? Esta acción no se puede deshacer.`);
+  if (!ok) return;
 
   const {
     data: { session },

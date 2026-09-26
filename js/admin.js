@@ -13,6 +13,7 @@ import { collectOrders, ORDER_COLUMNS } from "./orders-export.js";
 import { toCsv, csvFilename } from "./csv.js";
 import { pageInfo, formatCounter, renderPager } from "./pagination.js";
 import { groupAvancesByDay, fetchAvancePhotos, uploadAvance } from "./avances.js";
+import { confirmDialog } from "./confirm-dialog.js";
 import "./tooltip.js";
 
 const ORDERS_SELECT = "*, profiles(nombre, email), obras(nombre)";
@@ -211,9 +212,10 @@ async function exportOrders() {
 }
 
 async function deleteOrder(order) {
-  if (!confirm(`¿Eliminar la orden de "${order.piso}" (${formatDateTime(order.fecha_hora)})? Esta acción no se puede deshacer.`)) {
-    return;
-  }
+  const ok = await confirmDialog(
+    `¿Eliminar la orden de "${order.piso}" (${formatDateTime(order.fecha_hora)})? Esta acción no se puede deshacer.`
+  );
+  if (!ok) return;
 
   let avancePaths = [];
   try {
