@@ -56,11 +56,13 @@
       <input id="new-password" type="password" required minlength="6" />
 
       <label for="new-role">Rol</label>
-      <select id="new-role">
-        <option value="empleado">Empleado</option>
-        <option value="admin">Admin</option>
-        <option value="superadmin">Superadmin</option>
-      </select>
+      <div class="select-wrap">
+        <select id="new-role">
+          <option value="empleado">Empleado</option>
+          <option value="admin">Admin</option>
+          <option value="superadmin">Superadmin</option>
+        </select>
+      </div>
 
       <div class="modal-actions">
         <button type="submit">Crear usuario</button>
@@ -76,11 +78,13 @@
       <input id="edit-user-nombre" type="text" required />
 
       <label for="edit-user-role">Rol</label>
-      <select id="edit-user-role">
-        <option value="empleado">Empleado</option>
-        <option value="admin">Admin</option>
-        <option value="superadmin">Superadmin</option>
-      </select>
+      <div class="select-wrap">
+        <select id="edit-user-role">
+          <option value="empleado">Empleado</option>
+          <option value="admin">Admin</option>
+          <option value="superadmin">Superadmin</option>
+        </select>
+      </div>
 
       <label class="checkbox-label">
         <input id="edit-user-activo" type="checkbox" />

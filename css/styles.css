@@ -305,14 +305,38 @@ textarea {
 select {
   appearance: none;
   -webkit-appearance: none;
+  padding-right: 2.1rem;
+}
+
+/* La flecha del select vive en un elemento aparte (::after del wrapper),
+   no como background-image del <select> mismo. Pintarla como fondo del
+   propio control nativo es frágil en iOS Safari — el cálculo de
+   background-position sobre un <select> con appearance:none se descuadra
+   ahí de forma crónica (probado con varias sintaxis, ninguna se sostuvo).
+   Un elemento independiente y posicionado con absolute no depende en nada
+   de cómo iOS renderiza el control nativo por dentro. */
+.select-wrap {
+  position: relative;
+}
+
+.select-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 0.6rem;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236c6c66' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 8L10 12.5L14.5 8'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  /* calc() en vez de la sintaxis "right 0.6rem center" (offset desde el
-     borde): esa forma de 4 valores la interpreta mal WebKit en iOS y
-     termina pintando la flecha en la esquina izquierda. */
-  background-position: calc(100% - 0.6rem) center;
   background-size: 16px;
-  padding-right: 2.1rem;
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .select-wrap:not([data-theme="light"] *)::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%239a9a93' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 8L10 12.5L14.5 8'/%3E%3C/svg%3E");
+  }
 }
 
 input[type="date"],
@@ -336,12 +360,6 @@ input[type="datetime-local"] {
     width: 100%;
     max-width: 100%;
     min-width: 0;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  select:not([data-theme="light"] *) {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%239a9a93' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 8L10 12.5L14.5 8'/%3E%3C/svg%3E");
   }
 }
 
