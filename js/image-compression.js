@@ -12,12 +12,19 @@ export function computeTargetDimensions(width, height, maxDimension = MAX_DIMENS
   };
 }
 
-function renameToJpeg(name) {
-  return name.replace(/\.[^./]+$/, "") + ".jpg";
+// El nombre original (capturas de pantalla, fotos de cámara, etc.) puede
+// traer espacios, paréntesis o caracteres unicode que Supabase Storage
+// rechaza como parte de la ruta del objeto (400 Bad Request). El nombre no
+// aporta nada de valor de negocio aquí, así que se reemplaza siempre por
+// uno propio, seguro y único.
+function safeFileName() {
+  return `${crypto.randomUUID()}.jpg`;
 }
 
 export async function compressImage(file, { maxDimension = MAX_DIMENSION, quality = JPEG_QUALITY } = {}) {
-  if (!file.type.startsWith("image/")) return file;
+  if (!file.type.startsWith("image/")) {
+    return new File([file], safeFileName(), { type: file.type });
+  }
 
   const bitmap = await createImageBitmap(file);
   const { width, height } = computeTargetDimensions(bitmap.width, bitmap.height, maxDimension);
@@ -29,7 +36,7 @@ export async function compressImage(file, { maxDimension = MAX_DIMENSION, qualit
   bitmap.close();
 
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
-  if (!blob || blob.size >= file.size) return file;
+  const smaller = blob && blob.size < file.size;
 
-  return new File([blob], renameToJpeg(file.name), { type: "image/jpeg" });
+  return new File([smaller ? blob : file], safeFileName(), { type: smaller ? "image/jpeg" : file.type });
 }
