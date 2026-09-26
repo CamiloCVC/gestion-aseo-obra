@@ -317,18 +317,19 @@ input[type="datetime-local"] {
   color-scheme: light dark;
 }
 
-/* iOS Safari no respeta bien height/padding en input[type="date"] cuando
-   está vacío (queda mucho más alto de lo normal, se ve como una caja
-   grande vacía). @supports (-webkit-touch-callout: none) detecta Safari de
-   iOS específicamente (no aplica en desktop ni en otros navegadores). */
+/* iOS Safari fuerza box-sizing: content-box en input[type="date"] pase lo
+   que digamos en CSS, así que padding y borde se suman POR FUERA del ancho
+   que le damos (de ahí el desborde) y también queda más alto de lo normal.
+   appearance: none normaliza eso sin quitar el selector nativo de fecha.
+   @supports (-webkit-touch-callout: none) detecta Safari de iOS
+   específicamente (no aplica en desktop ni en otros navegadores). Fuente:
+   https://gomakethings.com/articles/fixing-temporal-input-styling-in-safari/ */
 @supports (-webkit-touch-callout: none) {
   input[type="date"],
   input[type="datetime-local"] {
+    -webkit-appearance: none;
+    appearance: none;
     box-sizing: border-box;
-    height: 2.5rem;
-    line-height: 2.5rem;
-    padding-top: 0;
-    padding-bottom: 0;
     width: 100%;
     max-width: 100%;
     min-width: 0;
