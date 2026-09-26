@@ -270,20 +270,25 @@ async function openDetail(order) {
     <div class="gallery"><h4>Después</h4><div id="carousel-despues"></div></div>
   `;
 
-  renderCarousel(document.getElementById("carousel-antes"), antesUrls, "antes");
-  renderCarousel(document.getElementById("carousel-despues"), despuesUrls, "despues");
+  await Promise.all([
+    renderCarousel(document.getElementById("carousel-antes"), antesUrls, "antes"),
+    renderCarousel(document.getElementById("carousel-despues"), despuesUrls, "despues"),
+  ]);
 }
 
 modalClose.addEventListener("click", () => modal.close());
 
 function formatDay(day) {
   const [year, month, date] = day.split("-").map(Number);
-  return new Date(year, month - 1, date).toLocaleDateString("es-CO", {
+  const formatted = new Date(year, month - 1, date).toLocaleDateString("es-CO", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+  // Intl devuelve todo en minúscula ("viernes, 25 de septiembre..."); solo
+  // la primera letra debe ir en mayúscula, no cada palabra.
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
 async function openAvances(order) {
@@ -311,17 +316,22 @@ async function openAvances(order) {
     .map(
       (group, index) => `
         <details class="avance-card" ${index === 0 ? "open" : ""}>
-          <summary>${escapeHtml(formatDay(group.day))} · ${group.fotos.length} foto${group.fotos.length === 1 ? "" : "s"}</summary>
+          <summary>
+            <i data-lucide="chevron-right" class="avance-chevron"></i>
+            <span class="avance-day">${escapeHtml(formatDay(group.day))}</span>
+            <span class="avance-count">${group.fotos.length} foto${group.fotos.length === 1 ? "" : "s"}</span>
+          </summary>
           <div class="gallery" id="avance-carousel-${index}"></div>
         </details>
       `
     )
     .join("");
+  renderIcons();
 
   await Promise.all(
     groups.map(async (group, index) => {
       const urls = await signedUrls(group.fotos);
-      renderCarousel(document.getElementById(`avance-carousel-${index}`), urls, "avance");
+      await renderCarousel(document.getElementById(`avance-carousel-${index}`), urls, "avance");
     })
   );
 }

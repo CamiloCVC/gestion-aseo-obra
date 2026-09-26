@@ -512,52 +512,49 @@ button.danger:hover {
   justify-content: center;
 }
 
-/* Carousel */
+/* Carousel (carrusel compacto embebido, Swiper) */
 
-.carousel {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  margin-bottom: var(--space-xs);
-}
-
-.carousel-image {
-  flex: 1;
-  min-width: 0;
-  max-height: 260px;
-  width: 100%;
-  object-fit: contain;
+.compact-swiper {
+  height: 260px;
   border-radius: var(--radius);
+  overflow: hidden;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
+  --swiper-navigation-size: 20px;
+  --swiper-navigation-color: var(--color-text);
+}
+
+.compact-swiper .swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compact-swiper .swiper-slide img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
   cursor: zoom-in;
 }
 
-.carousel-nav {
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
+.compact-swiper .swiper-pagination-fraction {
+  bottom: 8px;
+  left: 50%;
+  width: auto;
+  transform: translateX(-50%);
+  background: rgb(0 0 0 / 0.55);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.15rem 0.6rem;
   border-radius: 999px;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  font-size: 1.1rem;
-  flex-shrink: 0;
-}
-
-.carousel-nav:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  background: var(--color-surface-raised);
 }
 
 .carousel-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  font-size: 0.82rem;
-  color: var(--color-muted);
-  margin-bottom: var(--space-md);
+  justify-content: flex-end;
+  margin: var(--space-xs) 0 var(--space-md);
 }
 
 /* Modal form actions */
@@ -871,18 +868,24 @@ dialog::backdrop {
   top: var(--space-md);
   width: 40px;
   height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
   border: none;
-  background: rgb(0 0 0 / 0.5);
+  background: rgb(255 255 255 / 0.14);
   color: #fff;
-  font-size: 1.3rem;
-  line-height: 1;
   z-index: 20;
+}
+
+.lightbox-close svg,
+.lightbox-download svg {
+  width: 20px;
+  height: 20px;
 }
 
 .lightbox-close {
   right: var(--space-md);
-  font-size: 1.4rem;
 }
 
 .lightbox-download {
@@ -891,7 +894,7 @@ dialog::backdrop {
 
 .lightbox-close:hover,
 .lightbox-download:hover {
-  background: rgb(0 0 0 / 0.7);
+  background: rgb(255 255 255 / 0.24);
 }
 
 /* Toasts */
@@ -950,27 +953,72 @@ dialog::backdrop {
   margin-bottom: var(--space-xs);
 }
 
+#avances-modal {
+  max-width: 640px;
+}
+
 .avance-card {
   border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-border);
   border-radius: var(--radius);
-  padding: var(--space-sm);
   margin-bottom: var(--space-sm);
   background: var(--color-surface);
+  overflow: hidden;
+  transition: border-left-color var(--duration-fast) var(--ease-out-expo);
+}
+
+.avance-card[open] {
+  border-left-color: var(--color-accent);
 }
 
 .avance-card summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text);
-  text-transform: capitalize;
+  list-style: none;
 }
 
-.avance-card[open] summary {
-  margin-bottom: var(--space-sm);
+.avance-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.avance-card summary:hover {
+  background: var(--color-surface-raised);
+}
+
+.avance-chevron {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--color-muted);
+  transition: transform var(--duration-fast) var(--ease-out-expo);
+}
+
+.avance-card[open] .avance-chevron {
+  transform: rotate(90deg);
+  color: var(--color-accent);
+}
+
+.avance-day {
+  flex: 1;
+}
+
+.avance-count {
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
 .avance-card .gallery {
-  margin-top: var(--space-sm);
+  padding: 0 var(--space-sm) var(--space-sm);
 }
 
 .thumbs {

@@ -51,7 +51,7 @@ async function loadOrder(id) {
   const { data: signed } = await supabase.storage
     .from("evidencias")
     .createSignedUrls(order.fotos_antes ?? [], 60 * 10);
-  renderCarousel(
+  await renderCarousel(
     document.getElementById("carousel-antes"),
     (signed ?? []).map((entry) => entry.signedUrl).filter(Boolean),
     "antes"
