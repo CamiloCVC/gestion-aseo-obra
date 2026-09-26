@@ -307,7 +307,10 @@ select {
   -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236c6c66' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 8L10 12.5L14.5 8'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.6rem center;
+  /* calc() en vez de la sintaxis "right 0.6rem center" (offset desde el
+     borde): esa forma de 4 valores la interpreta mal WebKit en iOS y
+     termina pintando la flecha en la esquina izquierda. */
+  background-position: calc(100% - 0.6rem) center;
   background-size: 16px;
   padding-right: 2.1rem;
 }
