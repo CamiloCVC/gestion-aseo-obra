@@ -194,7 +194,13 @@ async function deleteOrder(order) {
     return;
   }
 
-  const avancePaths = await fetchAvancePhotos(supabase, order.id);
+  let avancePaths = [];
+  try {
+    avancePaths = await fetchAvancePhotos(supabase, order.id);
+  } catch (err) {
+    showToast(`Error al eliminar: ${err.message}`, "error");
+    return;
+  }
   const paths = [...(order.fotos_antes ?? []), ...(order.fotos_despues ?? []), ...avancePaths];
   if (paths.length > 0) {
     await supabase.storage.from("evidencias").remove(paths);

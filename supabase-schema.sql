@@ -171,6 +171,25 @@ create policy "staff elimina evidencia"
   to authenticated
   using (bucket_id = 'evidencias' and (select is_staff()));
 
+-- El dueño de la orden puede borrar SOLO las fotos de sus propios avances
+-- (ordenes/<id>/avances/...), no las de fotos_antes/fotos_despues (esas
+-- siguen siendo borrables solo por staff, vía la policy de arriba).
+-- Necesario para que uploadAvance() (rollback si el insert falla) y
+-- cleanupAvancesFor() (al completar la orden), que corren con la sesión
+-- del empleado, puedan borrar de storage.
+create policy "dueño borra fotos de sus avances"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'evidencias'
+    and (storage.foldername(objects.name))[3] = 'avances'
+    and exists (
+      select 1 from ordenes o
+      where o.creado_por_id = (select auth.uid())
+        and o.id::text = (storage.foldername(objects.name))[2]
+    )
+  );
+
 -- Avances (trazabilidad de progreso mientras una orden está en proceso).
 -- Se borra completa (filas + fotos en storage) al completar la orden.
 create table if not exists avances (
