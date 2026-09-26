@@ -1,6 +1,6 @@
 import { formatDateTime } from "./format-date.js";
 import { supabase } from "./supabase-client.js";
-import { requireActiveProfile, landingPageFor } from "./auth.js";
+import { requireActiveProfile, landingPageFor, isStaffRole } from "./auth.js";
 import { renderHeader } from "./layout.js";
 import { escapeHtml } from "./escape-html.js";
 import { wireDropZone } from "./drop-zone.js";
@@ -57,13 +57,13 @@ async function loadOrder(id) {
     "antes"
   );
 
-  const isOwner = order.creado_por_id === auth.session.user.id;
+  const canComplete = order.creado_por_id === auth.session.user.id || isStaffRole(currentProfile?.role);
   const isPending = (order.fotos_despues ?? []).length === 0;
 
-  if (!isOwner || !isPending) {
+  if (!canComplete || !isPending) {
     form.hidden = true;
-    statusEl.textContent = !isOwner
-      ? "Solo quien creó la orden puede completarla."
+    statusEl.textContent = !canComplete
+      ? "Solo quien creó la orden, o un admin, puede completarla."
       : "Esta orden ya fue completada.";
     return;
   }

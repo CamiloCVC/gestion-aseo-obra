@@ -12,7 +12,7 @@ import { fetchOrdersPage, validateDateRange } from "./orders-query.js";
 import { collectOrders, ORDER_COLUMNS } from "./orders-export.js";
 import { toCsv, csvFilename } from "./csv.js";
 import { pageInfo, formatCounter, renderPager } from "./pagination.js";
-import { groupAvancesByDay, fetchAvancePhotos } from "./avances.js";
+import { groupAvancesByDay, fetchAvancePhotos, uploadAvance } from "./avances.js";
 import "./tooltip.js";
 
 const ORDERS_SELECT = "*, profiles(nombre, email), obras(nombre)";
@@ -24,6 +24,8 @@ const modalClose = document.getElementById("modal-close");
 const avancesModal = document.getElementById("avances-modal");
 const avancesBody = document.getElementById("avances-body");
 const avancesModalClose = document.getElementById("avances-modal-close");
+const avanceInput = document.getElementById("avance-input");
+let avanceOrderId = null;
 const counter = document.getElementById("orders-counter");
 const pager = document.getElementById("pager");
 const exportBtn = document.getElementById("export-btn");
@@ -78,6 +80,21 @@ document.getElementById("filter-clear").addEventListener("click", () => {
   loadOrders(1);
 });
 exportBtn.addEventListener("click", exportOrders);
+
+avanceInput.addEventListener("change", async () => {
+  const files = Array.from(avanceInput.files).filter((file) => file.type.startsWith("image/"));
+  const orderId = avanceOrderId;
+  avanceInput.value = "";
+  if (!orderId || files.length === 0) return;
+
+  showToast("Subiendo avance...", "info");
+  try {
+    await uploadAvance(supabase, orderId, files);
+    showToast("Avance registrado.", "success");
+  } catch (err) {
+    showToast(`Error al subir el avance: ${err.message}`, "error");
+  }
+});
 
 function readFilters() {
   return {
@@ -138,7 +155,6 @@ function renderOrders(data) {
   tableBody.innerHTML = "";
   for (const order of data) {
     const isPending = (order.fotos_despues ?? []).length === 0;
-    const isOwn = order.creado_por_id === auth.session.user.id;
 
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -151,13 +167,18 @@ function renderOrders(data) {
       <td><span class="badge ${isPending ? "badge-pendiente" : "badge-completa"}">${isPending ? "Pendiente" : "Completa"}</span></td>
       <td><div class="icon-actions">
         <button class="icon-btn ver-btn" data-tooltip="Ver detalle" aria-label="Ver detalle"><i data-lucide="eye"></i></button>
-        <button class="icon-btn avances-btn" data-tooltip="Ver avances" aria-label="Ver avances"><i data-lucide="history"></i></button>
-        ${isPending && isOwn ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}
+        ${isPending ? `<button class="icon-btn avances-btn" data-tooltip="Ver avances" aria-label="Ver avances"><i data-lucide="history"></i></button>` : ""}
+        ${isPending ? `<button class="icon-btn avance-btn" data-tooltip="Agregar avance" aria-label="Agregar avance"><i data-lucide="camera"></i></button>` : ""}
+        ${isPending ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}
         <button class="icon-btn icon-btn-danger delete-btn" data-tooltip="Eliminar orden" aria-label="Eliminar orden"><i data-lucide="trash-2"></i></button>
       </div></td>
     `;
     row.querySelector(".ver-btn").addEventListener("click", () => openDetail(order));
-    row.querySelector(".avances-btn").addEventListener("click", () => openAvances(order));
+    row.querySelector(".avances-btn")?.addEventListener("click", () => openAvances(order));
+    row.querySelector(".avance-btn")?.addEventListener("click", () => {
+      avanceOrderId = order.id;
+      avanceInput.click();
+    });
     row.querySelector(".delete-btn").addEventListener("click", () => deleteOrder(order));
     tableBody.appendChild(row);
   }

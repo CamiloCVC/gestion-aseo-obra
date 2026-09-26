@@ -12,8 +12,12 @@ export async function getProfile(userId) {
 
 const STAFF_ROLES = ["admin", "superadmin"];
 
+function isStaffRole(role) {
+  return STAFF_ROLES.includes(role);
+}
+
 function landingPageFor(role) {
-  return STAFF_ROLES.includes(role) ? "admin.html" : "mis-ordenes.html";
+  return isStaffRole(role) ? "admin.html" : "mis-ordenes.html";
 }
 
 export async function requireActiveProfile() {
@@ -47,4 +51,4 @@ export async function requireRole(allowedRoles) {
   return result;
 }
 
-export { landingPageFor };
+export { landingPageFor, isStaffRole };

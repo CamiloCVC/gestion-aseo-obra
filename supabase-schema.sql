@@ -146,6 +146,19 @@ create policy "staff elimina ordenes"
   to authenticated
   using ((select is_staff()));
 
+-- El dueño de la orden o cualquier staff pueden completarla (subir
+-- fotos_despues) mientras siga pendiente.
+create policy "dueño o staff completan una orden pendiente"
+  on ordenes for update
+  to authenticated
+  using (
+    (creado_por_id = (select auth.uid()) or (select is_staff()))
+    and cardinality(fotos_despues) = 0
+  )
+  with check (
+    creado_por_id = (select auth.uid()) or (select is_staff())
+  );
+
 create policy "activos suben evidencia"
   on storage.objects for insert
   to authenticated
@@ -202,7 +215,9 @@ create table if not exists avances (
 
 alter table avances enable row level security;
 
-create policy "dueño de la orden agrega avances mientras esté pendiente"
+-- El dueño de la orden o cualquier staff pueden agregar avances mientras
+-- la orden siga pendiente.
+create policy "dueño o staff agregan avances mientras esté pendiente"
   on avances for insert
   to authenticated
   with check (
@@ -211,7 +226,7 @@ create policy "dueño de la orden agrega avances mientras esté pendiente"
     and exists (
       select 1 from ordenes o
       where o.id = orden_id
-        and o.creado_por_id = (select auth.uid())
+        and (o.creado_por_id = (select auth.uid()) or (select is_staff()))
         and coalesce(array_length(o.fotos_despues, 1), 0) = 0
     )
   );
