@@ -317,6 +317,24 @@ input[type="datetime-local"] {
   color-scheme: light dark;
 }
 
+/* iOS Safari no respeta bien height/padding en input[type="date"] cuando
+   está vacío (queda mucho más alto de lo normal, se ve como una caja
+   grande vacía). @supports (-webkit-touch-callout: none) detecta Safari de
+   iOS específicamente (no aplica en desktop ni en otros navegadores). */
+@supports (-webkit-touch-callout: none) {
+  input[type="date"],
+  input[type="datetime-local"] {
+    box-sizing: border-box;
+    height: 2.5rem;
+    line-height: 2.5rem;
+    padding-top: 0;
+    padding-bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   select:not([data-theme="light"] *) {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%239a9a93' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 8L10 12.5L14.5 8'/%3E%3C/svg%3E");
