@@ -134,3 +134,65 @@ Plan en `tasks/plan.md` (sección al final). Spec: `docs/spec-ordenes-filtros-ex
   - Verify: correr `supabase/migrations/20260924_rls_initplan.sql` en el SQL Editor; probar login empleado/admin/superadmin
   - Files: supabase-schema.sql, supabase/migrations/20260924_rls_initplan.sql
   - Pendiente: aplicarla al proyecto real (usuario, no hay CLI/MCP de Supabase en esta sesión)
+
+---
+
+# Todo: Avances (trazabilidad) de órdenes en proceso
+
+Plan en `tasks/plan.md` (última sección). Spec: `docs/spec-avances-ordenes.md`.
+
+- [ ] Task: Migración `avances` (tabla + policies) aplicada al proyecto real
+  - Acceptance: tabla `avances` existe con RLS habilitado y las 3 policies
+    (insert dueño+pendiente, select dueño/staff, delete dueño/staff)
+  - Verify: `list_tables`/`execute_sql` contra el proyecto muestra la tabla y las policies
+  - Files: supabase-schema.sql, supabase/migrations/20260925_avances.sql
+
+- [ ] Task: `js/avances.js` — `groupAvancesByDay` (TDD)
+  - Acceptance: agrupa avances del mismo día (fotos concatenadas, orden de
+    inserción); separa días distintos; ordena descendente por día; `[]` → `[]`
+  - Verify: `npm run test:unit`
+  - Files: js/avances.js, tests/unit/avances.spec.js
+
+- [ ] Task: `js/avances.js` — `uploadAvance` y `cleanupAvancesFor`
+  - Acceptance: `uploadAvance` comprime cada archivo, sube a
+    `ordenes/<id>/avances/<ts>-<nombre>`, inserta una fila con todas las rutas;
+    si el insert falla, borra de storage lo ya subido antes de relanzar el error.
+    `cleanupAvancesFor` lee `fotos` de todas las filas del orden, borra esas
+    rutas de storage y borra las filas.
+  - Verify: `npm run test:unit` (con cliente supabase falso/mock)
+  - Files: js/avances.js, tests/unit/avances.spec.js
+
+- [ ] Task: Empleado — botón "Agregar avance" en `mis-ordenes.html`
+  - Acceptance: icono cámara visible solo si la orden está Pendiente; click
+    abre `<input type="file" accept="image/*" capture="environment" multiple>`;
+    al elegir fotos, sube vía `uploadAvance` con estado deshabilitado +
+    toast de progreso/éxito/error
+  - Verify: navegador (desktop simula selección de archivos; cámara real solo en móvil)
+  - Files: mis-ordenes.html, js/mis-ordenes.js
+
+- [ ] Task: Admin — botón "Ver avances" + modal con tarjetas por día
+  - Acceptance: icono `history` en cada fila; abre `<dialog>` nuevo con
+    tarjetas desplegables (una por día, más reciente arriba), cada una con
+    `renderCarousel` de las fotos de ese día (URLs firmadas); empty state sin avances
+  - Verify: navegador con órdenes que tengan avances de prueba insertados
+  - Files: admin.html, js/admin.js, css/styles.css
+
+- [ ] Task: Limpieza de avances al completar la orden
+  - Acceptance: tras guardar `fotos_despues`, se llama `cleanupAvancesFor`;
+    fallo de limpieza no revierte ni falla la operación de completar (best-effort)
+  - Verify: completar una orden con avances de prueba y confirmar que
+    desaparecen (tabla `avances` y bucket)
+  - Files: js/completar-orden.js
+
+- [ ] Task: Limpieza de avances al eliminar la orden (admin)
+  - Acceptance: `deleteOrder` incluye las fotos de `avances` de esa orden en
+    el `storage.remove` antes de borrar la orden
+  - Verify: eliminar una orden con avances de prueba y confirmar que no
+    quedan archivos huérfanos en `evidencias`
+  - Files: js/admin.js
+
+- [ ] Task: Verificación final
+  - Acceptance: `npm test` verde; sin overflow horizontal a 320/768/1024/1440
+    en el modal de avances; code-reviewer sin issues CRITICAL/HIGH
+  - Verify: `npm test` + revisión en navegador + code-reviewer
+  - Files: ninguno

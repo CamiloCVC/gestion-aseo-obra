@@ -109,3 +109,53 @@ CSS toolbar/pager ─► admin y mis-ordenes
 
 Tras 1: `npm test` verde. Tras 3: revisar en navegador la tabla admin antes de
 seguir. Tras 5: contador vs CSV. Al final: `npm test` + revisión de código.
+
+---
+
+# Plan: Avances (trazabilidad) de órdenes en proceso
+
+Spec: `docs/spec-avances-ordenes.md` (aprobado). Independiente de los planes
+anteriores; reusa `carousel.js`, `image-compression.js`, `format-date.js`,
+patrón `<dialog>`.
+
+## Grafo de dependencias
+
+```
+migración SQL (tabla avances + policies) ─► js/avances.js (groupAvancesByDay, TDD)
+                                            ├─► mis-ordenes.js (Agregar avance)
+                                            └─► admin.js (Ver avances + modal)
+                                                 completar-orden.js (limpieza al completar)
+                                                 admin.js deleteOrder (limpieza al eliminar)
+```
+
+## Fases (cortes verticales)
+
+1. **Esquema + RLS** — aplicar la migración `avances` (tabla + 3 policies) al
+   proyecto real vía Supabase MCP. Riesgo: cambio de esquema en prod;
+   confirmar con el usuario antes de aplicar (ya autorizado en esta tarea).
+2. **`js/avances.js` (TDD)** — `groupAvancesByDay` puro y testeable primero;
+   luego `uploadAvance` (comprimir + subir + insert, con rollback de storage
+   si el insert falla) y `cleanupAvancesFor` (leer fotos, borrar de storage,
+   borrar filas).
+3. **Empleado: botón "Agregar avance"** — `mis-ordenes.html` (input file
+   oculto) + `mis-ordenes.js` (icono cámara, wiring, toasts).
+4. **Admin: botón "Ver avances" + modal** — `admin.html` (`<dialog>` nuevo) +
+   `admin.js` (fetch, agrupar, pintar tarjetas desplegables + carrusel por
+   día) + CSS de las tarjetas.
+5. **Limpieza al completar / eliminar** — `completar-orden.js` llama
+   `cleanupAvancesFor` tras guardar `fotos_despues`; `admin.js deleteOrder`
+   incluye las fotos de avances en el `storage.remove` antes de borrar la
+   orden.
+6. **Verificación final** — unit tests verdes, prueba manual en navegador
+   (desktop, ya que la cámara real solo se puede probar en móvil), 4
+   breakpoints en el modal de avances.
+
+## Orden
+
+1 → 2 → (3 ∥ 4) → 5 → 6.
+
+## Checkpoints
+
+Tras 1: confirmar en Supabase que la tabla y las policies quedaron creadas.
+Tras 2: `npm test` verde. Tras 3 y 4: revisión visual en navegador. Al final:
+`npm test` + code-reviewer + push.

@@ -12,6 +12,7 @@ import { fetchOrdersPage, validateDateRange } from "./orders-query.js";
 import { collectOrders, ORDER_COLUMNS } from "./orders-export.js";
 import { toCsv, csvFilename } from "./csv.js";
 import { pageInfo, formatCounter, renderPager } from "./pagination.js";
+import { groupAvancesByDay, fetchAvancePhotos } from "./avances.js";
 import "./tooltip.js";
 
 const ORDERS_SELECT = "*, profiles(nombre, email), obras(nombre)";
@@ -20,6 +21,9 @@ const tableBody = document.getElementById("orders-body");
 const modal = document.getElementById("detail-modal");
 const modalBody = document.getElementById("modal-body");
 const modalClose = document.getElementById("modal-close");
+const avancesModal = document.getElementById("avances-modal");
+const avancesBody = document.getElementById("avances-body");
+const avancesModalClose = document.getElementById("avances-modal-close");
 const counter = document.getElementById("orders-counter");
 const pager = document.getElementById("pager");
 const exportBtn = document.getElementById("export-btn");
@@ -147,11 +151,13 @@ function renderOrders(data) {
       <td><span class="badge ${isPending ? "badge-pendiente" : "badge-completa"}">${isPending ? "Pendiente" : "Completa"}</span></td>
       <td><div class="icon-actions">
         <button class="icon-btn ver-btn" data-tooltip="Ver detalle" aria-label="Ver detalle"><i data-lucide="eye"></i></button>
+        <button class="icon-btn avances-btn" data-tooltip="Ver avances" aria-label="Ver avances"><i data-lucide="history"></i></button>
         ${isPending && isOwn ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}
         <button class="icon-btn icon-btn-danger delete-btn" data-tooltip="Eliminar orden" aria-label="Eliminar orden"><i data-lucide="trash-2"></i></button>
       </div></td>
     `;
     row.querySelector(".ver-btn").addEventListener("click", () => openDetail(order));
+    row.querySelector(".avances-btn").addEventListener("click", () => openAvances(order));
     row.querySelector(".delete-btn").addEventListener("click", () => deleteOrder(order));
     tableBody.appendChild(row);
   }
@@ -188,7 +194,8 @@ async function deleteOrder(order) {
     return;
   }
 
-  const paths = [...(order.fotos_antes ?? []), ...(order.fotos_despues ?? [])];
+  const avancePaths = await fetchAvancePhotos(supabase, order.id);
+  const paths = [...(order.fotos_antes ?? []), ...(order.fotos_despues ?? []), ...avancePaths];
   if (paths.length > 0) {
     await supabase.storage.from("evidencias").remove(paths);
   }
@@ -239,3 +246,53 @@ async function openDetail(order) {
 }
 
 modalClose.addEventListener("click", () => modal.close());
+
+function formatDay(day) {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(year, month - 1, date).toLocaleDateString("es-CO", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+async function openAvances(order) {
+  avancesBody.innerHTML = "<p>Cargando avances...</p>";
+  avancesModal.showModal();
+
+  const { data, error } = await supabase
+    .from("avances")
+    .select("fotos, created_at")
+    .eq("orden_id", order.id)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    avancesBody.innerHTML = `<p class="empty-state">Error cargando avances: ${escapeHtml(error.message)}</p>`;
+    return;
+  }
+
+  const groups = groupAvancesByDay(data ?? []);
+  if (groups.length === 0) {
+    avancesBody.innerHTML = `<p class="empty-state">Sin avances registrados.</p>`;
+    return;
+  }
+
+  avancesBody.innerHTML = groups
+    .map(
+      (group, index) => `
+        <details class="avance-card" ${index === 0 ? "open" : ""}>
+          <summary>${escapeHtml(formatDay(group.day))} · ${group.fotos.length} foto${group.fotos.length === 1 ? "" : "s"}</summary>
+          <div class="gallery" id="avance-carousel-${index}"></div>
+        </details>
+      `
+    )
+    .join("");
+
+  for (const [index, group] of groups.entries()) {
+    const urls = await signedUrls(group.fotos);
+    renderCarousel(document.getElementById(`avance-carousel-${index}`), urls, "avance");
+  }
+}
+
+avancesModalClose.addEventListener("click", () => avancesModal.close());

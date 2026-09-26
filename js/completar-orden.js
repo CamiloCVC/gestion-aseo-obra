@@ -6,6 +6,7 @@ import { escapeHtml } from "./escape-html.js";
 import { wireDropZone } from "./drop-zone.js";
 import { compressImage } from "./image-compression.js";
 import { renderCarousel } from "./carousel.js";
+import { cleanupAvancesFor } from "./avances.js";
 
 const summaryEl = document.getElementById("order-summary");
 const form = document.getElementById("complete-form");
@@ -125,6 +126,14 @@ async function onSubmit(event, id) {
 
     const { error } = await supabase.from("ordenes").update({ fotos_despues: paths }).eq("id", id);
     if (error) throw error;
+
+    try {
+      await cleanupAvancesFor(supabase, id);
+    } catch (cleanupErr) {
+      // ponytail: la orden ya quedó completada; no revertimos por un fallo
+      // de limpieza de avances. Best-effort, se puede reintentar a mano.
+      console.error("No se pudo limpiar los avances de la orden", cleanupErr);
+    }
 
     const backHref = landingPageFor(currentProfile?.role);
     const backLabel = backHref === "admin.html" ? "Ir a Órdenes" : "Ir a Mis órdenes";

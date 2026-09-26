@@ -7,6 +7,7 @@ import { renderIcons } from "./icons.js";
 import { showToast } from "./toast.js";
 import { fetchOrdersPage, validateDateRange } from "./orders-query.js";
 import { pageInfo, formatCounter, renderPager } from "./pagination.js";
+import { uploadAvance } from "./avances.js";
 import "./tooltip.js";
 
 const tableBody = document.getElementById("orders-body");
@@ -14,6 +15,8 @@ const counter = document.getElementById("orders-counter");
 const pager = document.getElementById("pager");
 const desdeInput = document.getElementById("filter-desde");
 const hastaInput = document.getElementById("filter-hasta");
+const avanceInput = document.getElementById("avance-input");
+let avanceOrderId = null;
 
 let currentPage = 1;
 let totalOrders = 0;
@@ -50,6 +53,21 @@ document.getElementById("filter-clear").addEventListener("click", () => {
   loadMyOrders(1);
 });
 
+avanceInput.addEventListener("change", async () => {
+  const files = Array.from(avanceInput.files).filter((file) => file.type.startsWith("image/"));
+  const orderId = avanceOrderId;
+  avanceInput.value = "";
+  if (!orderId || files.length === 0) return;
+
+  showToast("Subiendo avance...", "info");
+  try {
+    await uploadAvance(supabase, orderId, files);
+    showToast("Avance registrado.", "success");
+  } catch (err) {
+    showToast(`Error al subir el avance: ${err.message}`, "error");
+  }
+});
+
 function readFilters() {
   return { empleadoId: auth.session.user.id, desde: desdeInput.value, hasta: hastaInput.value };
 }
@@ -80,21 +98,27 @@ async function loadMyOrders(page = currentPage) {
     return;
   }
 
-  tableBody.innerHTML = result.data
-    .map((order) => {
-      const isPending = (order.fotos_despues ?? []).length === 0;
-      return `
-        <tr>
-          <td>${escapeHtml(formatDateTime(order.fecha_hora))}</td>
-          <td>${escapeHtml(order.obras?.nombre) || "-"}</td>
-          <td>${escapeHtml(order.piso)}</td>
-          <td>${escapeHtml(order.contratista)}</td>
-          <td>${(order.fotos_antes ?? []).length} / ${(order.fotos_despues ?? []).length}</td>
-          <td><span class="badge ${isPending ? "badge-pendiente" : "badge-completa"}">${isPending ? "Pendiente" : "Completa"}</span></td>
-          <td><div class="icon-actions">${isPending ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}</div></td>
-        </tr>
-      `;
-    })
-    .join("");
+  tableBody.innerHTML = "";
+  for (const order of result.data) {
+    const isPending = (order.fotos_despues ?? []).length === 0;
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(formatDateTime(order.fecha_hora))}</td>
+      <td>${escapeHtml(order.obras?.nombre) || "-"}</td>
+      <td>${escapeHtml(order.piso)}</td>
+      <td>${escapeHtml(order.contratista)}</td>
+      <td>${(order.fotos_antes ?? []).length} / ${(order.fotos_despues ?? []).length}</td>
+      <td><span class="badge ${isPending ? "badge-pendiente" : "badge-completa"}">${isPending ? "Pendiente" : "Completa"}</span></td>
+      <td><div class="icon-actions">
+        ${isPending ? `<button type="button" class="icon-btn avance-btn" data-tooltip="Agregar avance" aria-label="Agregar avance"><i data-lucide="camera"></i></button>` : ""}
+        ${isPending ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}
+      </div></td>
+    `;
+    row.querySelector(".avance-btn")?.addEventListener("click", () => {
+      avanceOrderId = order.id;
+      avanceInput.click();
+    });
+    tableBody.appendChild(row);
+  }
   renderIcons();
 }
