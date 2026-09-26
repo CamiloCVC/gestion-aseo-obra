@@ -295,10 +295,12 @@ async function openAvances(order) {
     )
     .join("");
 
-  for (const [index, group] of groups.entries()) {
-    const urls = await signedUrls(group.fotos);
-    renderCarousel(document.getElementById(`avance-carousel-${index}`), urls, "avance");
-  }
+  await Promise.all(
+    groups.map(async (group, index) => {
+      const urls = await signedUrls(group.fotos);
+      renderCarousel(document.getElementById(`avance-carousel-${index}`), urls, "avance");
+    })
+  );
 }
 
 avancesModalClose.addEventListener("click", () => avancesModal.close());

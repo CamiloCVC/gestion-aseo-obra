@@ -530,6 +530,7 @@ button.danger:hover {
   border-radius: var(--radius);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
+  cursor: zoom-in;
 }
 
 .carousel-nav {
@@ -791,6 +792,47 @@ dialog {
 
 dialog::backdrop {
   background: rgb(20 20 18 / 0.4);
+}
+
+/* Lightbox: agrandar foto del carrusel al hacer click */
+
+.lightbox {
+  padding: 0;
+  border: none;
+  max-width: 95vw;
+  width: auto;
+  background: transparent;
+  box-shadow: none;
+}
+
+.lightbox::backdrop {
+  background: rgb(0 0 0 / 0.85);
+}
+
+.lightbox-image {
+  display: block;
+  max-width: 95vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: var(--radius);
+}
+
+.lightbox-close {
+  position: fixed;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: none;
+  background: rgb(0 0 0 / 0.5);
+  color: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.lightbox-close:hover {
+  background: rgb(0 0 0 / 0.7);
 }
 
 /* Toasts */
