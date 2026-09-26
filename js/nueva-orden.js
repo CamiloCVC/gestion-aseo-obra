@@ -7,6 +7,7 @@ import { compressImage } from "./image-compression.js";
 import { loadObras } from "./obras.js";
 import { escapeHtml } from "./escape-html.js";
 import { nuevaOrdenSchema, firstErrorMessage } from "./validation.js";
+import { infoDialog } from "./info-dialog.js";
 
 const form = document.getElementById("order-form");
 const obraSelect = document.getElementById("obra");
@@ -143,14 +144,10 @@ form.addEventListener("submit", async (event) => {
       fotosDespuesPaths.length === 0
         ? " Quedó como <strong>pendiente</strong> — podrás completarla con las fotos de después cuando termines."
         : "";
-    statusEl.innerHTML = `Orden registrada correctamente.${pendingNote} <a href="${backHref}">${backLabel}</a>`;
 
-    form.reset();
-    state.antes = [];
-    state.despues = [];
-    renderPreview("antes");
-    renderPreview("despues");
-    setDefaultFechaHora();
+    await infoDialog(`Orden registrada correctamente.${pendingNote}`, { okLabel: backLabel });
+    window.location.href = backHref;
+    return;
   } catch (err) {
     statusEl.textContent = `Error: ${err.message}`;
   } finally {

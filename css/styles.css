@@ -811,6 +811,22 @@ dialog::backdrop {
   gap: var(--space-sm);
 }
 
+/* Info dialog: aviso de una sola acción (éxito, etc.) */
+
+.info-dialog {
+  max-width: 420px;
+}
+
+.info-dialog-message {
+  margin-bottom: var(--space-md);
+  color: var(--color-text);
+}
+
+.info-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* Lightbox: agrandar foto del carrusel al hacer click */
 
 .lightbox {
