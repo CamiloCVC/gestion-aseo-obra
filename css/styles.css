@@ -528,6 +528,15 @@ button.danger:hover {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Safari a veces no actualiza el cursor en hover sobre elementos con
+     transform 3D (el truco de aceleración por GPU que usa cada slide de
+     Swiper) — se repite cursor: zoom-in en toda la cadena de ancestros
+     para que, sea cual sea el que Safari use para el hit-test, lo tenga. */
+  cursor: zoom-in;
+}
+
+.compact-swiper .swiper-zoom-container {
+  cursor: zoom-in;
 }
 
 .compact-swiper .swiper-slide img {
