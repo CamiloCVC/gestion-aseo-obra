@@ -30,7 +30,7 @@ export async function uploadAvance(supabase, orderId, files, { compress = compre
     for (const file of files) {
       const compressed = await compress(file);
       const path = avancePath(orderId, compressed.name);
-      const { error } = await supabase.storage.from(BUCKET).upload(path, compressed);
+      const { error } = await supabase.storage.from(BUCKET).upload(path, compressed, { cacheControl: "31536000" });
       if (error) throw error;
       paths.push(path);
     }

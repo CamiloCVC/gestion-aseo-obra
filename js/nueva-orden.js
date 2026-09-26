@@ -89,7 +89,7 @@ async function uploadPhotos(files, orderId, stage) {
   for (const file of files) {
     const compressed = await compressImage(file);
     const path = `ordenes/${orderId}/${stage}/${Date.now()}-${compressed.name}`;
-    const { error } = await supabase.storage.from("evidencias").upload(path, compressed);
+    const { error } = await supabase.storage.from("evidencias").upload(path, compressed, { cacheControl: "31536000" });
     if (error) throw error;
     paths.push(path);
   }
