@@ -884,16 +884,17 @@ dialog::backdrop {
   height: 26px;
 }
 
-/* Separadas espacialmente (cerrar arriba, descargar abajo) para que no se
-   confundan entre sí — no solo por el ícono, sino por dónde están. */
-.lightbox-close {
+.lightbox-close,
+.lightbox-download {
   top: var(--space-md);
+}
+
+.lightbox-close {
   right: var(--space-md);
 }
 
 .lightbox-download {
-  bottom: var(--space-md);
-  left: var(--space-md);
+  right: calc(var(--space-md) * 2 + 52px);
 }
 
 .lightbox-close:hover {
@@ -901,7 +902,7 @@ dialog::backdrop {
 }
 
 .lightbox-download:hover {
-  background: rgb(255 255 255 / 0.28);
+  background: var(--color-success);
 }
 
 /* Toasts */
