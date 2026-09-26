@@ -326,12 +326,10 @@ input[type="datetime-local"] {
   input[type="datetime-local"] {
     box-sizing: border-box;
     height: 2.5rem;
-    line-height: 2.5rem;
-    padding-top: 0;
-    padding-bottom: 0;
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    overflow: hidden;
   }
 }
 
