@@ -14,6 +14,7 @@ import { toCsv, csvFilename } from "./csv.js";
 import { pageInfo, formatCounter, renderPager } from "./pagination.js";
 import { groupAvancesByDay, fetchAvancePhotos, uploadAvance } from "./avances.js";
 import { confirmDialog } from "./confirm-dialog.js";
+import { editContratistaSchema, firstErrorMessage } from "./validation.js";
 import "./tooltip.js";
 
 const ORDERS_SELECT = "*, profiles(nombre, email), obras(nombre)";
@@ -168,6 +169,7 @@ function renderOrders(data) {
       <td><span class="badge ${isPending ? "badge-pendiente" : "badge-completa"}">${isPending ? "Pendiente" : "Completa"}</span></td>
       <td><div class="icon-actions">
         <button class="icon-btn ver-btn" data-tooltip="Ver detalle" aria-label="Ver detalle"><i data-lucide="eye"></i></button>
+        <button class="icon-btn edit-contratista-btn" data-tooltip="Editar contratista" aria-label="Editar contratista"><i data-lucide="pencil"></i></button>
         ${isPending ? `<button class="icon-btn avances-btn" data-tooltip="Ver avances" aria-label="Ver avances"><i data-lucide="history"></i></button>` : ""}
         ${isPending ? `<button class="icon-btn avance-btn" data-tooltip="Agregar avance" aria-label="Agregar avance"><i data-lucide="camera"></i></button>` : ""}
         ${isPending ? `<a class="icon-btn icon-btn-accent" href="completar-orden.html?id=${escapeHtml(order.id)}" data-tooltip="Completar orden" aria-label="Completar orden"><i data-lucide="check-circle-2"></i></a>` : ""}
@@ -176,6 +178,7 @@ function renderOrders(data) {
       </div></td>
     `;
     row.querySelector(".ver-btn").addEventListener("click", () => openDetail(order));
+    row.querySelector(".edit-contratista-btn").addEventListener("click", () => openEditContratista(order));
     row.querySelector(".avances-btn")?.addEventListener("click", () => openAvances(order));
     row.querySelector(".avance-btn")?.addEventListener("click", () => {
       avanceOrderId = order.id;
@@ -241,6 +244,44 @@ async function deleteOrder(order) {
   totalOrders = Math.max(0, totalOrders - 1);
   await loadOrders(currentPage);
 }
+
+const editContratistaModal = document.getElementById("edit-contratista-modal");
+const editContratistaForm = document.getElementById("edit-contratista-form");
+const editContratistaInput = document.getElementById("edit-contratista-input");
+let editingContratistaId = null;
+
+function openEditContratista(order) {
+  editingContratistaId = order.id;
+  editContratistaInput.value = order.contratista;
+  editContratistaModal.showModal();
+}
+
+document.getElementById("edit-contratista-cancel").addEventListener("click", () => editContratistaModal.close());
+
+editContratistaForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const parsed = editContratistaSchema.safeParse({ contratista: editContratistaInput.value });
+  if (!parsed.success) {
+    showToast(firstErrorMessage(parsed), "error");
+    return;
+  }
+
+  // select() para detectar un update bloqueado por RLS (0 filas, sin error).
+  const { data, error } = await supabase
+    .from("ordenes")
+    .update(parsed.data)
+    .eq("id", editingContratistaId)
+    .select("id");
+  if (error || data.length === 0) {
+    showToast(`Error al guardar: ${error?.message ?? "no se pudo actualizar la orden."}`, "error");
+    return;
+  }
+
+  showToast("Contratista actualizado.", "success");
+  editContratistaModal.close();
+  await loadOrders(currentPage);
+});
 
 async function reopenOrder(order) {
   const ok = await confirmDialog(

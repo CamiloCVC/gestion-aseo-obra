@@ -30,6 +30,10 @@ export const editObraSchema = z.object({
   activa: z.boolean(),
 });
 
+export const editContratistaSchema = z.object({
+  contratista: z.string().trim().min(1, "El contratista es obligatorio."),
+});
+
 export const createObraSchema = z.object({
   nombre: z.string().trim().min(1, "El nombre de la obra es obligatorio."),
 });

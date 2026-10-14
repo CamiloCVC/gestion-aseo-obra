@@ -89,6 +89,18 @@
     <button class="secondary" id="avances-modal-close">Cerrar</button>
   </dialog>
 
+  <dialog id="edit-contratista-modal">
+    <h3>Editar contratista</h3>
+    <form id="edit-contratista-form" novalidate>
+      <label for="edit-contratista-input">Contratista responsable de los residuos</label>
+      <input id="edit-contratista-input" type="text" required />
+      <div class="modal-actions">
+        <button type="submit">Guardar cambios</button>
+        <button type="button" class="secondary" id="edit-contratista-cancel">Cancelar</button>
+      </div>
+    </form>
+  </dialog>
+
   <input type="file" id="avance-input" accept="image/*" multiple hidden />
 
   <script type="module" src="js/admin.js"></script>
