@@ -1,5 +1,5 @@
-const MAX_DIMENSION = 1920;
-const JPEG_QUALITY = 0.8;
+const MAX_DIMENSION = 1280; // evidencia de aseo: suficiente con zoom en celular
+const JPEG_QUALITY = 0.7;
 
 export function computeTargetDimensions(width, height, maxDimension = MAX_DIMENSION) {
   if (width <= maxDimension && height <= maxDimension) {
