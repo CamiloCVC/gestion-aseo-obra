@@ -38,6 +38,10 @@ datos protegidas por RLS.
    Editor: `update profiles set role = 'superadmin' where email = '...';`
 5. Deploy de la Edge Function: `supabase functions deploy admin-create-user
    --project-ref <ref>` (o pégala manualmente en el dashboard).
+   Limpieza mensual de fotos (día 15 borra las del mes anterior):
+   `supabase functions deploy cleanup-evidencias --no-verify-jwt` y corre
+   `supabase/migrations/20261120_cleanup_evidencias_cron.sql` (crea los
+   secretos en Vault y el job de pg_cron).
 6. Project Settings → Data API → copia URL y `anon`/`publishable` key a
    `js/supabase-config.js`.
 7. Desde `usuarios.html`, el superadmin crea al resto de cuentas — no hace
